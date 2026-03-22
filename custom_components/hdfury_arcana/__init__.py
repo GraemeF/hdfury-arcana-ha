@@ -41,4 +41,5 @@ async def async_setup_entry(hass: HomeAssistant, entry: ArcanaConfigEntry) -> bo
 
 async def async_unload_entry(hass: HomeAssistant, entry: ArcanaConfigEntry) -> bool:
     """Unload a config entry."""
+    await entry.runtime_data.coordinator.async_disconnect()
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

@@ -140,3 +140,8 @@ class TestConnection:
         await coordinator._async_update_data()
 
         mock_client.connect.assert_called_once()
+
+    async def test_disconnect_closes_client(self, coordinator, mock_client):
+        await coordinator.async_disconnect()
+
+        mock_client.disconnect.assert_called_once()

@@ -77,9 +77,11 @@ class TestCommandFormatting:
 class TestResponseParsing:
     """Test that responses are parsed correctly."""
 
-    async def test_strips_crlf_from_response(self, client, mock_serial_connection):
+    async def test_strips_param_name_from_response(
+        self, client, mock_serial_connection
+    ):
         reader, writer = mock_serial_connection
-        reader.readuntil = AsyncMock(return_value=b"auto\r\n")
+        reader.readuntil = AsyncMock(return_value=b"scalemode auto\r\n")
 
         with (
             patch.object(client, "_reader", reader),
@@ -90,20 +92,33 @@ class TestResponseParsing:
 
         assert result == "auto"
 
-    async def test_strips_whitespace_from_response(
+    async def test_handles_response_with_no_param_prefix(
         self, client, mock_serial_connection
     ):
         reader, writer = mock_serial_connection
-        reader.readuntil = AsyncMock(return_value=b"  1.2.3  \r\n")
+        reader.readuntil = AsyncMock(return_value=b"ok\r\n")
 
         with (
             patch.object(client, "_reader", reader),
             patch.object(client, "_writer", writer),
             patch.object(client, "_connected", True),
         ):
-            result = await client.get("ver")
+            result = await client.get("hotplug")
 
-        assert result == "1.2.3"
+        assert result == "ok"
+
+    async def test_handles_negative_values(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(return_value=b"hdrboostvalue -500\r\n")
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get("hdrboostvalue")
+
+        assert result == "-500"
 
 
 class TestTimeout:

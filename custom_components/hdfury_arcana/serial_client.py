@@ -55,7 +55,11 @@ class ArcanaSerialClient:
 
     async def get(self, param: str) -> str:
         """Send a get command and return the response value."""
-        return await self._send_command(f"#arcana get {param}\r")
+        response = await self._send_command(f"#arcana get {param}\r")
+        parts = response.split(None, 1)
+        if len(parts) > 1:
+            return parts[1]
+        return response
 
     async def set(self, param: str, value: str | None = None) -> str:
         """Send a set command and return the response."""

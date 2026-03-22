@@ -3,18 +3,22 @@
 from __future__ import annotations
 
 from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
 from .const import DOMAIN
-from .coordinator import ArcanaCoordinator
 
 
-class ArcanaEntity(CoordinatorEntity[ArcanaCoordinator]):
+class ArcanaEntity(CoordinatorEntity[DataUpdateCoordinator[dict[str, str]]]):
     """Base entity for HDFury Arcana devices."""
 
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator: ArcanaCoordinator, key: str) -> None:
+    def __init__(
+        self, coordinator: DataUpdateCoordinator[dict[str, str]], key: str
+    ) -> None:
         super().__init__(coordinator)
         self._key = key
         self._serial = coordinator.data["serial"]

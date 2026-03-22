@@ -34,12 +34,15 @@ POLLED_PARAMS: list[str] = [
     "osdcolorvalue",
     "osd",
     "osdtimervalue",
+    "osdfade",
+]
+
+SIGNAL_POLLED_PARAMS: list[str] = [
     "rxin5v",
     "txhpd",
     "txtmds",
     "audiochtx",
     "audiopcm",
-    "osdfade",
 ]
 
 STATUS_PARAMS: list[str] = [
@@ -56,9 +59,11 @@ STATIC_PARAMS: list[str] = [
     "serial",
 ]
 
+DEFAULT_SIGNAL_POLL_INTERVAL = 30
+
 
 class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
-    """Coordinator that polls the HDFury Arcana over serial."""
+    """Coordinator that polls Arcana settings over serial."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         super().__init__(
@@ -93,7 +98,7 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
         await self._client.connect()
 
     async def _async_update_data(self) -> dict[str, str]:
-        """Fetch data from the Arcana."""
+        """Fetch settings data from the Arcana."""
         try:
             params_to_poll = list(POLLED_PARAMS)
             if not self._static_data:
@@ -103,11 +108,50 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
             for param in params_to_poll:
                 data[param] = await self._client.get(param)
 
-            for param in STATUS_PARAMS:
-                data[param] = await self._client.get_status(param)
-
             if not self._static_data:
                 self._static_data = {p: data[p] for p in STATIC_PARAMS}
+
+            return {**self._static_data, **data}
+        except (
+            ConnectionError,
+            OSError,
+            asyncio.TimeoutError,
+            asyncio.IncompleteReadError,
+        ) as err:
+            raise UpdateFailed(str(err)) from err
+
+
+class ArcanaSignalCoordinator(DataUpdateCoordinator[dict[str, str]]):
+    """Coordinator that polls Arcana signal status at a faster interval."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        client: ArcanaSerialClient,
+        static_data: dict[str, str],
+        poll_interval: int = DEFAULT_SIGNAL_POLL_INTERVAL,
+    ) -> None:
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=f"{DOMAIN}_signal",
+            config_entry=entry,
+            update_interval=timedelta(seconds=poll_interval),
+            always_update=False,
+        )
+        self._client = client
+        self._static_data = static_data
+
+    async def _async_update_data(self) -> dict[str, str]:
+        """Fetch signal status data from the Arcana."""
+        try:
+            data: dict[str, str] = {}
+            for param in SIGNAL_POLLED_PARAMS:
+                data[param] = await self._client.get(param)
+
+            for param in STATUS_PARAMS:
+                data[param] = await self._client.get_status(param)
 
             return {**self._static_data, **data}
         except (

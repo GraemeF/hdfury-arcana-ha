@@ -8,7 +8,11 @@ import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.hdfury_arcana.const import DOMAIN
-from custom_components.hdfury_arcana.coordinator import POLLED_PARAMS, STATIC_PARAMS
+from custom_components.hdfury_arcana.coordinator import (
+    POLLED_PARAMS,
+    SIGNAL_POLLED_PARAMS,
+    STATIC_PARAMS,
+)
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -17,8 +21,11 @@ def _mock_client_with_data():
     """Create a mock client that returns data for all params."""
     client = AsyncMock()
     client.connected = True
-    responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
-    client.get = AsyncMock(side_effect=lambda p: responses[p])
+    get_responses = {
+        p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS + SIGNAL_POLLED_PARAMS
+    }
+    client.get = AsyncMock(side_effect=lambda p: get_responses[p])
+    client.get_status = AsyncMock(side_effect=lambda p: f"{p}_status")
     return client
 
 

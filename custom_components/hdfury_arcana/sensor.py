@@ -31,11 +31,14 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensor entities."""
     coordinator = entry.runtime_data.coordinator
+    signal_coordinator = entry.runtime_data.signal_coordinator
     entities: list[SensorEntity] = [
         ArcanaFirmwareSensor(coordinator),
         ArcanaSerialSensor(coordinator),
     ]
-    entities.extend(ArcanaDiagnosticSensor(coordinator, key) for key in SIGNAL_SENSORS)
+    entities.extend(
+        ArcanaDiagnosticSensor(signal_coordinator, key) for key in SIGNAL_SENSORS
+    )
     async_add_entities(entities)
 
 

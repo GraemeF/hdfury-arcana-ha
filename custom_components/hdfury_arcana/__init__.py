@@ -8,7 +8,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .coordinator import ArcanaCoordinator
+from .coordinator import (
+    ArcanaCoordinator,
+    ArcanaSignalCoordinator,
+    DEFAULT_SIGNAL_POLL_INTERVAL,
+)
 
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -27,6 +31,7 @@ class ArcanaRuntimeData:
     """Runtime data for the HDFury Arcana integration."""
 
     coordinator: ArcanaCoordinator
+    signal_coordinator: ArcanaSignalCoordinator
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ArcanaConfigEntry) -> bool:
@@ -34,7 +39,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ArcanaConfigEntry) -> bo
     coordinator = ArcanaCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
-    entry.runtime_data = ArcanaRuntimeData(coordinator=coordinator)
+    poll_interval = entry.options.get(
+        "signal_poll_interval", DEFAULT_SIGNAL_POLL_INTERVAL
+    )
+    signal_coordinator = ArcanaSignalCoordinator(
+        hass,
+        entry,
+        coordinator._client,
+        static_data={
+            "ver": coordinator.data["ver"],
+            "serial": coordinator.data["serial"],
+        },
+        poll_interval=poll_interval,
+    )
+    await signal_coordinator.async_config_entry_first_refresh()
+
+    entry.runtime_data = ArcanaRuntimeData(
+        coordinator=coordinator,
+        signal_coordinator=signal_coordinator,
+    )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

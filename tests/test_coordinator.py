@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 from unittest.mock import AsyncMock
 
 import pytest
@@ -11,7 +12,9 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from custom_components.hdfury_arcana.coordinator import (
     ArcanaCoordinator,
+    ArcanaSignalCoordinator,
     POLLED_PARAMS,
+    SIGNAL_POLLED_PARAMS,
     STATIC_PARAMS,
     STATUS_PARAMS,
 )
@@ -51,30 +54,6 @@ class TestFirstPoll:
         for param in POLLED_PARAMS:
             mock_client.get.assert_any_call(param)
             assert data[param] == f"{param}_val"
-
-
-class TestStatusParams:
-    """Test that status subcommands are polled via get_status."""
-
-    async def test_polls_status_params(self, coordinator, mock_client):
-        all_responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
-        mock_client.get = AsyncMock(side_effect=lambda p: all_responses[p])
-        status_responses = {p: f"{p}_status" for p in STATUS_PARAMS}
-        mock_client.get_status = AsyncMock(side_effect=lambda p: status_responses[p])
-
-        data = await coordinator._async_update_data()
-
-        for param in STATUS_PARAMS:
-            mock_client.get_status.assert_any_call(param)
-            assert data[param] == f"{param}_status"
-
-    async def test_status_error_raises_update_failed(self, coordinator, mock_client):
-        all_responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
-        mock_client.get = AsyncMock(side_effect=lambda p: all_responses[p])
-        mock_client.get_status = AsyncMock(side_effect=ConnectionError("port gone"))
-
-        with pytest.raises(UpdateFailed, match="port gone"):
-            await coordinator._async_update_data()
 
 
 class TestSubsequentPolls:
@@ -204,3 +183,68 @@ class TestSendCommand:
 
         with pytest.raises(HomeAssistantError):
             await coordinator.async_set("scalemode", "auto")
+
+
+class TestSignalCoordinator:
+    """Test the signal status coordinator."""
+
+    @pytest.fixture
+    def signal_coordinator(
+        self, hass: HomeAssistant, mock_config_entry: MockConfigEntry, mock_client
+    ) -> ArcanaSignalCoordinator:
+        coord = ArcanaSignalCoordinator(
+            hass,
+            mock_config_entry,
+            mock_client,
+            static_data={"ver": "1.0", "serial": "SN001"},
+        )
+        return coord
+
+    async def test_polls_signal_params(self, signal_coordinator, mock_client):
+        get_responses = {p: f"{p}_val" for p in SIGNAL_POLLED_PARAMS}
+        mock_client.get = AsyncMock(side_effect=lambda p: get_responses[p])
+        status_responses = {p: f"{p}_status" for p in STATUS_PARAMS}
+        mock_client.get_status = AsyncMock(side_effect=lambda p: status_responses[p])
+
+        data = await signal_coordinator._async_update_data()
+
+        for param in SIGNAL_POLLED_PARAMS:
+            mock_client.get.assert_any_call(param)
+            assert data[param] == f"{param}_val"
+        for param in STATUS_PARAMS:
+            mock_client.get_status.assert_any_call(param)
+            assert data[param] == f"{param}_status"
+
+    async def test_includes_static_data(self, signal_coordinator, mock_client):
+        get_responses = {p: f"{p}_val" for p in SIGNAL_POLLED_PARAMS}
+        mock_client.get = AsyncMock(side_effect=lambda p: get_responses[p])
+        mock_client.get_status = AsyncMock(return_value="ok")
+
+        data = await signal_coordinator._async_update_data()
+
+        assert data["ver"] == "1.0"
+        assert data["serial"] == "SN001"
+
+    async def test_default_interval_is_30_seconds(self, signal_coordinator):
+        assert signal_coordinator.update_interval == timedelta(seconds=30)
+
+    async def test_custom_interval(self, hass, mock_config_entry, mock_client):
+        coord = ArcanaSignalCoordinator(
+            hass,
+            mock_config_entry,
+            mock_client,
+            static_data={"ver": "1.0", "serial": "SN001"},
+            poll_interval=60,
+        )
+        assert coord.update_interval == timedelta(seconds=60)
+
+    async def test_does_not_poll_settings_params(self, signal_coordinator, mock_client):
+        get_responses = {p: f"{p}_val" for p in SIGNAL_POLLED_PARAMS}
+        mock_client.get = AsyncMock(side_effect=lambda p: get_responses[p])
+        mock_client.get_status = AsyncMock(return_value="ok")
+
+        await signal_coordinator._async_update_data()
+
+        called_params = [call.args[0] for call in mock_client.get.call_args_list]
+        assert "scalemode" not in called_params
+        assert "hdrmode" not in called_params

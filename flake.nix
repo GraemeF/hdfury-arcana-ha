@@ -53,6 +53,7 @@
             pythonEnv
             bd
             pkgs.git
+            pkgs.go-task
             pkgs.ruff
           ];
 

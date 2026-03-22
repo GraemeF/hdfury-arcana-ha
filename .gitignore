@@ -13,3 +13,6 @@ result
 .beads-credential-key
 .direnv/
 .claude/settings.local.json
+.venv/
+.task/
+build/

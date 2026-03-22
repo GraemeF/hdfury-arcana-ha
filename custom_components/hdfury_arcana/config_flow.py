@@ -67,7 +67,12 @@ class ArcanaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Validate connection and create config entry, or show errors."""
         try:
             info = await self._validate_connection(serial_port)
-        except (ConnectionError, asyncio.TimeoutError, OSError):
+        except (
+            ConnectionError,
+            asyncio.TimeoutError,
+            asyncio.IncompleteReadError,
+            OSError,
+        ):
             errors["base"] = "cannot_connect"
         except Exception:
             _LOGGER.exception("Unexpected error during config flow")

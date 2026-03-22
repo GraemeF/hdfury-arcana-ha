@@ -117,6 +117,14 @@ class TestErrorHandling:
         with pytest.raises(UpdateFailed, match="device gone"):
             await coordinator._async_update_data()
 
+    async def test_incomplete_read_raises_update_failed(self, coordinator, mock_client):
+        mock_client.get = AsyncMock(
+            side_effect=asyncio.IncompleteReadError(b"partial", 100)
+        )
+
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
 
 class TestConnection:
     """Test coordinator manages client connection."""

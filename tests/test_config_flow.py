@@ -212,6 +212,35 @@ class TestConnectionErrors:
         assert result["type"] == FlowResultType.FORM
         assert result["errors"]["base"] == "cannot_connect"
 
+    async def test_shows_error_on_incomplete_read(self, hass: HomeAssistant):
+        ports = [_mock_comport()]
+
+        with (
+            patch(
+                "custom_components.hdfury_arcana.config_flow.comports",
+                return_value=ports,
+            ),
+            patch(
+                "custom_components.hdfury_arcana.config_flow.ArcanaSerialClient"
+            ) as mock_cls,
+        ):
+            mock_client = AsyncMock()
+            mock_client.get = AsyncMock(
+                side_effect=asyncio.IncompleteReadError(b"partial", 100)
+            )
+            mock_cls.return_value = mock_client
+
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={"serial_port": "/dev/ttyUSB0"},
+            )
+
+        assert result["type"] == FlowResultType.FORM
+        assert result["errors"]["base"] == "cannot_connect"
+
     async def test_manual_step_shows_error_on_failure(self, hass: HomeAssistant):
         with (
             patch(

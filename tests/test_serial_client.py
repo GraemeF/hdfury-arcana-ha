@@ -291,3 +291,20 @@ class TestTransportErrorMarksDisconnected:
             await client.get("scalemode")
 
         assert not client.connected
+
+    async def test_incomplete_read_marks_disconnected(
+        self, client, mock_serial_connection
+    ):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(
+            side_effect=asyncio.IncompleteReadError(b"partial", 100)
+        )
+
+        client._reader = reader
+        client._writer = writer
+        client._connected = True
+
+        with pytest.raises(asyncio.IncompleteReadError):
+            await client.get("scalemode")
+
+        assert not client.connected

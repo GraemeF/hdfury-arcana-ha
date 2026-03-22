@@ -81,5 +81,10 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
                 self._static_data = {p: data[p] for p in STATIC_PARAMS}
 
             return {**self._static_data, **data}
-        except (ConnectionError, OSError, asyncio.TimeoutError) as err:
+        except (
+            ConnectionError,
+            OSError,
+            asyncio.TimeoutError,
+            asyncio.IncompleteReadError,
+        ) as err:
             raise UpdateFailed(str(err)) from err

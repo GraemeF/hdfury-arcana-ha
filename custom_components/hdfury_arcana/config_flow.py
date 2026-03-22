@@ -12,6 +12,7 @@ from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import DOMAIN
+from .coordinator import DEFAULT_SIGNAL_POLL_INTERVAL
 from .serial_client import ArcanaSerialClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,10 +20,40 @@ _LOGGER = logging.getLogger(__name__)
 MANUAL_ENTRY = "Enter manually..."
 
 
+class ArcanaOptionsFlow(config_entries.OptionsFlow):
+    """Handle options for HDFury Arcana."""
+
+    async def async_step_init(
+        self, user_input: dict[str, int] | None = None
+    ) -> FlowResult:
+        """Handle the options form."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current = self.config_entry.options.get(
+            "signal_poll_interval", DEFAULT_SIGNAL_POLL_INTERVAL
+        )
+        schema = vol.Schema(
+            {
+                vol.Required("signal_poll_interval", default=current): vol.All(
+                    int, vol.Range(min=5, max=300)
+                ),
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)
+
+
 class ArcanaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for HDFury Arcana."""
 
     VERSION = 1
+
+    @staticmethod
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> ArcanaOptionsFlow:
+        """Get the options flow handler."""
+        return ArcanaOptionsFlow()
 
     async def async_step_user(
         self, user_input: dict[str, str] | None = None

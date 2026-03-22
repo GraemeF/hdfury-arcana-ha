@@ -22,6 +22,15 @@
       "already_configured": "Device is already configured"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "signal_poll_interval": "Signal poll interval (seconds)"
+        }
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "rxin5v": { "name": "Input 5V" },

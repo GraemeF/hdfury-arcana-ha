@@ -11,6 +11,7 @@ from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.hdfury_arcana.config_flow import MANUAL_ENTRY
 from custom_components.hdfury_arcana.const import DOMAIN
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 def _mock_comport(device="/dev/ttyUSB0", serial_number="ABC", manufacturer="FTDI"):
@@ -153,6 +154,40 @@ class TestManualStep:
         assert result["data"]["firmware_version"] == "2.5"
         assert result["data"]["serial_number"] == "XYZ789"
         assert result["result"].unique_id == "XYZ789"
+
+
+class TestOptionsFlow:
+    """Test the options flow for configuring poll interval."""
+
+    async def test_shows_current_interval(self, hass: HomeAssistant):
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            data={"serial_port": "/dev/ttyUSB0"},
+            unique_id="OPT1",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+
+        assert result["type"] == FlowResultType.FORM
+        assert result["step_id"] == "init"
+
+    async def test_saves_new_interval(self, hass: HomeAssistant):
+        entry = MockConfigEntry(
+            domain=DOMAIN,
+            data={"serial_port": "/dev/ttyUSB0"},
+            unique_id="OPT2",
+        )
+        entry.add_to_hass(hass)
+
+        result = await hass.config_entries.options.async_init(entry.entry_id)
+        result = await hass.config_entries.options.async_configure(
+            result["flow_id"],
+            user_input={"signal_poll_interval": 60},
+        )
+
+        assert result["type"] == FlowResultType.CREATE_ENTRY
+        assert entry.options["signal_poll_interval"] == 60
 
 
 class TestConnectionErrors:

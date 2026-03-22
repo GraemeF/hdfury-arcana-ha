@@ -161,3 +161,21 @@ class TestSendCommand:
         await coordinator.async_set("hotplug")
 
         mock_client.set.assert_called_once_with("hotplug", None)
+
+    async def test_transport_error_raises_homeassistant_error(
+        self, coordinator, mock_client
+    ):
+        from homeassistant.exceptions import HomeAssistantError
+
+        mock_client.set = AsyncMock(side_effect=OSError("port dead"))
+
+        with pytest.raises(HomeAssistantError, match="port dead"):
+            await coordinator.async_set("scalemode", "auto")
+
+    async def test_timeout_raises_homeassistant_error(self, coordinator, mock_client):
+        from homeassistant.exceptions import HomeAssistantError
+
+        mock_client.set = AsyncMock(side_effect=asyncio.TimeoutError)
+
+        with pytest.raises(HomeAssistantError):
+            await coordinator.async_set("scalemode", "auto")

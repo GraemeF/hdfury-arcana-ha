@@ -8,6 +8,7 @@ from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
@@ -56,7 +57,15 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
 
     async def async_set(self, param: str, value: str | None = None) -> str:
         """Send a set command to the device."""
-        return await self._client.set(param, value)
+        try:
+            return await self._client.set(param, value)
+        except (
+            ConnectionError,
+            OSError,
+            asyncio.TimeoutError,
+            asyncio.IncompleteReadError,
+        ) as err:
+            raise HomeAssistantError(str(err)) from err
 
     async def async_disconnect(self) -> None:
         """Disconnect the serial client."""

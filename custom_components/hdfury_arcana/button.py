@@ -20,7 +20,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up button entities."""
     coordinator = entry.runtime_data.coordinator
-    async_add_entities([ArcanaButtonEntity(coordinator, key) for key in BUTTONS])
+    entities: list[ButtonEntity] = [
+        ArcanaButtonEntity(coordinator, key) for key in BUTTONS
+    ]
+    entities.append(ArcanaRefreshButtonEntity(coordinator))
+    async_add_entities(entities)
 
 
 class ArcanaButtonEntity(ArcanaEntity, ButtonEntity):
@@ -32,3 +36,14 @@ class ArcanaButtonEntity(ArcanaEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_set(self._key)
+
+
+class ArcanaRefreshButtonEntity(ArcanaEntity, ButtonEntity):
+    """Button entity that triggers an immediate data refresh."""
+
+    def __init__(self, coordinator: ArcanaCoordinator) -> None:
+        super().__init__(coordinator, "refresh")
+        self._attr_translation_key = "refresh"
+
+    async def async_press(self) -> None:
+        await self.coordinator.async_request_refresh()

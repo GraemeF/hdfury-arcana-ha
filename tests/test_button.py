@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock
+
 import pytest
 from homeassistant.core import HomeAssistant
 
 from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
-from custom_components.hdfury_arcana.button import ArcanaButtonEntity, BUTTONS
+from custom_components.hdfury_arcana.button import (
+    ArcanaButtonEntity,
+    ArcanaRefreshButtonEntity,
+    BUTTONS,
+)
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -48,3 +54,23 @@ class TestButtonActions:
         await entity.async_press()
 
         mock_client.set.assert_called_once_with("reboot", None)
+
+
+class TestRefreshButton:
+    """Test the refresh button."""
+
+    async def test_press_triggers_refresh(self, coordinator):
+        coordinator.async_request_refresh = AsyncMock()
+        entity = ArcanaRefreshButtonEntity(coordinator)
+
+        await entity.async_press()
+
+        coordinator.async_request_refresh.assert_called_once()
+
+    async def test_press_does_not_send_serial_command(self, coordinator, mock_client):
+        coordinator.async_request_refresh = AsyncMock()
+        entity = ArcanaRefreshButtonEntity(coordinator)
+
+        await entity.async_press()
+
+        mock_client.set.assert_not_called()

@@ -57,7 +57,8 @@
     },
     "button": {
       "hotplug": { "name": "Hotplug" },
-      "reboot": { "name": "Reboot" }
+      "reboot": { "name": "Reboot" },
+      "refresh": { "name": "Refresh" }
     }
   }
 }

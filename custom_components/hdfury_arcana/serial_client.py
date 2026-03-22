@@ -56,6 +56,9 @@ class ArcanaSerialClient:
     async def get(self, param: str) -> str:
         """Send a get command and return the response value."""
         response = await self._send_command(f"#arcana get {param}\r")
+        # ver returns "ARCANA VER: 0.88" instead of "ver value"
+        if response.startswith("ARCANA VER:"):
+            return response.split(":")[-1].strip()
         parts = response.split(None, 1)
         if len(parts) > 1:
             return parts[1]

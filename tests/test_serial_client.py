@@ -107,6 +107,21 @@ class TestResponseParsing:
 
         assert result == "ok"
 
+    async def test_parses_ver_response_with_arcana_prefix(
+        self, client, mock_serial_connection
+    ):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(return_value=b"ARCANA VER: 0.88\r\n")
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get("ver")
+
+        assert result == "0.88"
+
     async def test_handles_negative_values(self, client, mock_serial_connection):
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"hdrboostvalue -500\r\n")

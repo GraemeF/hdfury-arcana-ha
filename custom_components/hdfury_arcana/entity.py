@@ -17,18 +17,18 @@ class ArcanaEntity(CoordinatorEntity[ArcanaCoordinator]):
     def __init__(self, coordinator: ArcanaCoordinator, key: str) -> None:
         super().__init__(coordinator)
         self._key = key
-        serial = coordinator.data["serial"]
-        self._attr_unique_id = f"{serial}_{key}"
+        self._serial = coordinator.data["serial"]
+        self._firmware = coordinator.data["ver"]
+        self._attr_unique_id = f"{self._serial}_{key}"
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info linking all entities to one device."""
-        data = self.coordinator.data
         return DeviceInfo(
-            identifiers={(DOMAIN, data["serial"])},
+            identifiers={(DOMAIN, self._serial)},
             name="HDFury Arcana",
             manufacturer="HDFury",
             model="Arcana",
-            sw_version=data["ver"],
-            serial_number=data["serial"],
+            sw_version=self._firmware,
+            serial_number=self._serial,
         )

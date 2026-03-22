@@ -37,6 +37,8 @@ class ArcanaSwitchEntity(ArcanaEntity, SwitchEntity):
 
     @property
     def is_on(self) -> bool:
+        if self.coordinator.data is None:
+            return False
         return self.coordinator.data.get(self._key) == "on"
 
     async def async_turn_on(self, **kwargs: Any) -> None:

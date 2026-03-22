@@ -38,6 +38,8 @@ class ArcanaFirmwareSensor(ArcanaEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | None:
+        if self.coordinator.data is None:
+            return None
         return self.coordinator.data.get("ver")
 
 
@@ -52,4 +54,6 @@ class ArcanaSerialSensor(ArcanaEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | None:
+        if self.coordinator.data is None:
+            return None
         return self.coordinator.data.get("serial")

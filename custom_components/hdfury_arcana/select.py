@@ -58,6 +58,8 @@ class ArcanaSelectEntity(ArcanaEntity, SelectEntity):
 
     @property
     def current_option(self) -> str | None:
+        if self.coordinator.data is None:
+            return None
         return self.coordinator.data.get(self._key)
 
     async def async_select_option(self, option: str) -> None:

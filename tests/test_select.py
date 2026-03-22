@@ -68,3 +68,12 @@ class TestSelectActions:
 
         mock_client.set.assert_called_once_with("scalemode", "none")
         coordinator.async_request_refresh.assert_called_once()
+
+
+class TestNoneData:
+    """Test select with None coordinator data."""
+
+    def test_current_option_returns_none(self, coordinator):
+        entity = ArcanaSelectEntity(coordinator, "scalemode")
+        coordinator.data = None
+        assert entity.current_option is None

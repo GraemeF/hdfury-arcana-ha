@@ -78,3 +78,12 @@ class TestNumberActions:
 
         mock_client.set.assert_called_once_with("hdrcustomvalue", "750")
         coordinator.async_request_refresh.assert_called_once()
+
+
+class TestNoneData:
+    """Test number with None coordinator data."""
+
+    def test_native_value_returns_none(self, coordinator):
+        entity = ArcanaNumberEntity(coordinator, "hdrcustomvalue")
+        coordinator.data = None
+        assert entity.native_value is None

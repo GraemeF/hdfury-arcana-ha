@@ -58,6 +58,8 @@ class ArcanaNumberEntity(ArcanaEntity, NumberEntity):
 
     @property
     def native_value(self) -> float | None:
+        if self.coordinator.data is None:
+            return None
         val = self.coordinator.data.get(self._key)
         if val is not None:
             return float(val)

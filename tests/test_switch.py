@@ -72,3 +72,12 @@ class TestSwitchActions:
 
         mock_client.set.assert_called_once_with("earcsel", "off")
         coordinator.async_request_refresh.assert_called_once()
+
+
+class TestNoneData:
+    """Test switch with None coordinator data."""
+
+    def test_is_on_returns_false(self, coordinator):
+        entity = ArcanaSwitchEntity(coordinator, "earcsel")
+        coordinator.data = None
+        assert entity.is_on is False

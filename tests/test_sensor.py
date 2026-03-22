@@ -56,3 +56,17 @@ class TestSerialSensor:
     def test_unique_id(self, coordinator):
         sensor = ArcanaSerialSensor(coordinator)
         assert sensor.unique_id == "ABC123_serial"
+
+
+class TestNoneData:
+    """Test entity properties when coordinator data is None."""
+
+    def test_firmware_sensor_returns_none(self, coordinator):
+        sensor = ArcanaFirmwareSensor(coordinator)
+        coordinator.data = None
+        assert sensor.native_value is None
+
+    def test_serial_sensor_returns_none(self, coordinator):
+        sensor = ArcanaSerialSensor(coordinator)
+        coordinator.data = None
+        assert sensor.native_value is None

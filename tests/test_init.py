@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -78,3 +79,50 @@ class TestUnloadOrdering:
         await hass.async_block_till_done()
 
         assert call_order == ["unload_platforms", "disconnect"]
+
+
+class TestSignalCoordinatorFailure:
+    """Test that setup succeeds even when signal commands fail."""
+
+    async def test_setup_succeeds_when_signal_commands_fail(
+        self, hass: HomeAssistant, mock_entry: MockConfigEntry
+    ):
+        mock_client = _mock_client_with_data()
+        mock_client.get_status = AsyncMock(
+            side_effect=asyncio.TimeoutError("no response")
+        )
+
+        with patch(
+            "custom_components.hdfury_arcana.coordinator.ArcanaSerialClient",
+            return_value=mock_client,
+        ):
+            await hass.config_entries.async_setup(mock_entry.entry_id)
+            await hass.async_block_till_done()
+
+        assert mock_entry.state.value == "loaded"
+
+    async def test_setup_succeeds_when_signal_get_fails(
+        self, hass: HomeAssistant, mock_entry: MockConfigEntry
+    ):
+        mock_client = _mock_client_with_data()
+        # Settings get works, but signal params fail
+        settings_responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
+
+        def selective_get(p):
+            if p in settings_responses:
+                return settings_responses[p]
+            raise asyncio.TimeoutError("no response")
+
+        mock_client.get = AsyncMock(side_effect=selective_get)
+        mock_client.get_status = AsyncMock(
+            side_effect=asyncio.TimeoutError("no response")
+        )
+
+        with patch(
+            "custom_components.hdfury_arcana.coordinator.ArcanaSerialClient",
+            return_value=mock_client,
+        ):
+            await hass.config_entries.async_setup(mock_entry.entry_id)
+            await hass.async_block_till_done()
+
+        assert mock_entry.state.value == "loaded"

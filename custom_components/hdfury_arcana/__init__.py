@@ -52,7 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ArcanaConfigEntry) -> bo
         },
         poll_interval=poll_interval,
     )
-    await signal_coordinator.async_config_entry_first_refresh()
+    await signal_coordinator.async_refresh()
 
     entry.runtime_data = ArcanaRuntimeData(
         coordinator=coordinator,

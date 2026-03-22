@@ -1,6 +1,6 @@
 # HDFury Arcana for Home Assistant
 
-A custom Home Assistant integration for the [HDFury Arcana](https://www.hdfury.com/product/arcana/) HDMI audio extractor, communicating over RS-232 serial.
+A custom Home Assistant integration for the [HDFury Arcana](https://www.hdfury.com/product/arcana/) eARC adapter, communicating over RS-232 serial.
 
 ## Installation
 
@@ -48,7 +48,7 @@ Copy the `custom_components/hdfury_arcana` directory into your Home Assistant `c
 | Audio mode | auto |
 | HDR mode | auto, off, force1000 |
 | LLDV to HDR mode | off, on |
-| LLDV to HDR primaries | bt2020, dci-p3 |
+| LLDV to HDR primaries mode | bt2020, dci-p3 |
 | Audio source | hdmi, tv |
 
 ### Numbers
@@ -71,7 +71,7 @@ Copy the `custom_components/hdfury_arcana` directory into your Home Assistant `c
 
 ## Requirements
 
-- HDFury Arcana connected via USB-to-serial adapter (FTDI recommended)
+- HDFury Arcana connected via USB-to-serial adapter
 - Home Assistant 2025.1.0 or later
 
 ## Serial Protocol

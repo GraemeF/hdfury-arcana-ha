@@ -25,11 +25,10 @@ tasks:
 
   setup:
     desc: Create venv and install dependencies
-    cmd: '{{.RUN_STEP}} "Install deps" sh -c "rm -rf .venv && python -m venv .venv && .venv/bin/pip install -e .[dev]"'
+    run: once
+    cmd: '{{.RUN_STEP}} "Install deps" sh -c "python -m venv .venv && .venv/bin/pip install .[dev]"'
     sources:
       - pyproject.toml
-    generates:
-      - .venv/bin/python
 
   # ============================================================================
   # FORMAT

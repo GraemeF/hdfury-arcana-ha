@@ -36,9 +36,11 @@ class TestCommandFormatting:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"auto\r\n")
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             await client.get("scalemode")
 
         writer.write.assert_called_once_with(b"#arcana get scalemode\r")
@@ -49,9 +51,11 @@ class TestCommandFormatting:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"ok\r\n")
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             await client.set("scalemode", "auto")
 
         writer.write.assert_called_once_with(b"#arcana set scalemode auto\r")
@@ -60,9 +64,11 @@ class TestCommandFormatting:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"ok\r\n")
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             await client.set("hotplug")
 
         writer.write.assert_called_once_with(b"#arcana set hotplug\r")
@@ -75,9 +81,11 @@ class TestResponseParsing:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"auto\r\n")
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             result = await client.get("scalemode")
 
         assert result == "auto"
@@ -88,9 +96,11 @@ class TestResponseParsing:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"  1.2.3  \r\n")
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             result = await client.get("ver")
 
         assert result == "1.2.3"
@@ -103,9 +113,11 @@ class TestTimeout:
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(side_effect=asyncio.TimeoutError)
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             with pytest.raises(asyncio.TimeoutError):
                 await client.get("scalemode")
 
@@ -127,9 +139,11 @@ class TestLocking:
 
         reader.readuntil = slow_read
 
-        with patch.object(client, "_reader", reader), patch.object(
-            client, "_writer", writer
-        ), patch.object(client, "_connected", True):
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
             await asyncio.gather(
                 client.get("scalemode"),
                 client.get("audiomode"),
@@ -168,8 +182,9 @@ class TestConnection:
         mock_writer.close = MagicMock()
         mock_writer.wait_closed = AsyncMock()
 
-        with patch.object(client, "_writer", mock_writer), patch.object(
-            client, "_connected", True
+        with (
+            patch.object(client, "_writer", mock_writer),
+            patch.object(client, "_connected", True),
         ):
             await client.disconnect()
 

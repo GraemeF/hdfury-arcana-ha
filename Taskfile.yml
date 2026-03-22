@@ -10,7 +10,7 @@
 #
 # Dependency graph:
 #
-#   format-check → unit-test → test
+#   setup → format-check + lint → unit-test → test
 
 version: "3"
 
@@ -25,10 +25,11 @@ tasks:
 
   setup:
     desc: Create venv and install dependencies
-    cmd: '{{.RUN_STEP}} "Install deps" sh -c "python -m venv .venv && .venv/bin/pip install -e .[dev]"'
+    cmd: '{{.RUN_STEP}} "Install deps" sh -c "rm -rf .venv && python -m venv .venv && .venv/bin/pip install -e .[dev]"'
     sources:
       - pyproject.toml
-      - flake.lock
+    generates:
+      - .venv/bin/python
 
   # ============================================================================
   # FORMAT
@@ -36,6 +37,7 @@ tasks:
 
   format:
     desc: Format Python code with ruff
+    deps: [setup]
     cmd: '{{.RUN_STEP}} "Format" {{.VENV_PYTHON}} -m ruff format custom_components/ tests/'
 
   format-check:
@@ -61,7 +63,7 @@ tasks:
   # ============================================================================
 
   unit-test:
-    desc: Run unit tests with coverage
+    desc: Run unit tests
     deps: [format-check, lint]
     cmd: '{{.RUN_STEP}} "Unit tests" {{.VENV_PYTHON}} -m pytest tests/ -v --tb=short'
     sources:

@@ -261,3 +261,33 @@ class TestReconnect:
 
         assert client.connected
         assert client._backoff_delay == client.INITIAL_BACKOFF
+
+
+class TestTransportErrorMarksDisconnected:
+    """Test that transport errors during commands mark connection as failed."""
+
+    async def test_timeout_marks_disconnected(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(side_effect=asyncio.TimeoutError)
+
+        client._reader = reader
+        client._writer = writer
+        client._connected = True
+
+        with pytest.raises(asyncio.TimeoutError):
+            await client.get("scalemode")
+
+        assert not client.connected
+
+    async def test_oserror_marks_disconnected(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(side_effect=OSError("device unplugged"))
+
+        client._reader = reader
+        client._writer = writer
+        client._connected = True
+
+        with pytest.raises(OSError):
+            await client.get("scalemode")
+
+        assert not client.connected

@@ -14,6 +14,9 @@
 
 version: "3"
 
+set: [pipefail]
+shopt: [globstar]
+
 vars:
   RUN_STEP: ./scripts/run-step.sh
   VENV_PYTHON: .venv/bin/python

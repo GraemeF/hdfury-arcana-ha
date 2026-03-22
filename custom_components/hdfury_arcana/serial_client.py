@@ -84,8 +84,12 @@ class ArcanaSerialClient:
         """Send a command under lock with timeout, return stripped response."""
         async with self._lock:
             await self._ensure_connected()
-            self._writer.write(cmd.encode())
-            raw = await asyncio.wait_for(
-                self._reader.readuntil(b"\r\n"), timeout=COMMAND_TIMEOUT
-            )
-            return raw.decode().strip()
+            try:
+                self._writer.write(cmd.encode())
+                raw = await asyncio.wait_for(
+                    self._reader.readuntil(b"\r\n"), timeout=COMMAND_TIMEOUT
+                )
+                return raw.decode().strip()
+            except (OSError, asyncio.TimeoutError):
+                self._connected = False
+                raise

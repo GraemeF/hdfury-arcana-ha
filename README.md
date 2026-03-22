@@ -6,9 +6,11 @@ A custom Home Assistant integration for the [HDFury Arcana](https://www.hdfury.c
 
 ### HACS (recommended)
 
-1. Add this repository as a custom repository in HACS
-2. Search for "HDFury Arcana" and install
-3. Restart Home Assistant
+1. Open HACS in your Home Assistant instance
+2. Click the three dots menu (top right) → **Custom repositories**
+3. Paste `GraemeF/hdfury-arcana-ha` and select **Integration** as the category
+4. Click **Add**, then find "HDFury Arcana" in the list and install it
+5. Restart Home Assistant
 
 ### Manual
 

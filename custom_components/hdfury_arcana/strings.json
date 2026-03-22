@@ -2,9 +2,15 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to HDFury Arcana",
+        "title": "Select serial port",
         "data": {
           "serial_port": "Serial port"
+        }
+      },
+      "manual": {
+        "title": "Enter serial port",
+        "data": {
+          "serial_port": "Serial port path"
         }
       }
     },

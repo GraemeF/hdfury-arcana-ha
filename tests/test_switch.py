@@ -27,6 +27,7 @@ def coordinator(
         "earcsel": "on",
         "arcsel": "off",
         "earcdelaymode": "on",
+        "lldvtohdrmode": "off",
     }
     return coord
 
@@ -38,6 +39,9 @@ class TestSwitchDefinitions:
         for key in SWITCHES:
             entity = ArcanaSwitchEntity(coordinator, key)
             assert entity.entity_category == EntityCategory.CONFIG
+
+    def test_lldvtohdrmode_is_a_switch(self, coordinator):
+        assert "lldvtohdrmode" in SWITCHES
 
 
 class TestSwitchState:

@@ -30,13 +30,13 @@
     "switch": {
       "earcsel": { "name": "eARC select" },
       "arcsel": { "name": "ARC select" },
-      "earcdelaymode": { "name": "eARC delay mode" }
+      "earcdelaymode": { "name": "eARC delay mode" },
+      "lldvtohdrmode": { "name": "LLDV to HDR mode" }
     },
     "select": {
       "scalemode": { "name": "Scale mode" },
       "audiomode": { "name": "Audio mode" },
       "hdrmode": { "name": "HDR mode" },
-      "lldvtohdrmode": { "name": "LLDV to HDR mode" },
       "lldvtohdrprimmode": { "name": "LLDV to HDR primaries mode" },
       "audsource": { "name": "Audio source" }
     },

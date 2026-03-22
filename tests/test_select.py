@@ -42,6 +42,9 @@ class TestSelectDefinitions:
             entity = ArcanaSelectEntity(coordinator, key)
             assert entity.entity_category == EntityCategory.CONFIG
 
+    def test_lldvtohdrmode_is_not_a_select(self, coordinator):
+        assert "lldvtohdrmode" not in SELECTS
+
     def test_scalemode_has_correct_options(self, coordinator):
         entity = ArcanaSelectEntity(coordinator, "scalemode")
         assert "auto" in entity.options

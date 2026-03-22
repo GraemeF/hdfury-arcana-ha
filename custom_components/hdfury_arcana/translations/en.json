@@ -61,12 +61,14 @@
       "lldvtohdrminlumvalue": { "name": "LLDV to HDR min luminance" },
       "lldvtohdrmaxlumvalue": { "name": "LLDV to HDR max luminance" },
       "osdcolorvalue": { "name": "OSD colour" },
-      "osdtimervalue": { "name": "OSD timer" }
+      "osdtimervalue": { "name": "OSD timer" },
+      "osdfade": { "name": "OSD fade" }
     },
     "button": {
       "hotplug": { "name": "Hotplug" },
       "reboot": { "name": "Reboot" },
-      "refresh": { "name": "Refresh" }
+      "refresh": { "name": "Refresh" },
+      "factoryreset": { "name": "Factory reset" }
     }
   }
 }

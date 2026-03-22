@@ -24,6 +24,7 @@ async def async_setup_entry(
         ArcanaButtonEntity(coordinator, key) for key in BUTTONS
     ]
     entities.append(ArcanaRefreshButtonEntity(coordinator))
+    entities.append(ArcanaFactoryResetButtonEntity(coordinator))
     async_add_entities(entities)
 
 
@@ -47,3 +48,14 @@ class ArcanaRefreshButtonEntity(ArcanaEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_request_refresh()
+
+
+class ArcanaFactoryResetButtonEntity(ArcanaEntity, ButtonEntity):
+    """Button entity that performs a factory reset."""
+
+    def __init__(self, coordinator: ArcanaCoordinator) -> None:
+        super().__init__(coordinator, "factoryreset")
+        self._attr_translation_key = "factoryreset"
+
+    async def async_press(self) -> None:
+        await self.coordinator.async_set("factoryreset", "3")

@@ -39,6 +39,7 @@ POLLED_PARAMS: list[str] = [
     "txtmds",
     "audiochtx",
     "audiopcm",
+    "osdfade",
 ]
 
 STATUS_PARAMS: list[str] = [

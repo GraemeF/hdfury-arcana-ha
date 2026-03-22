@@ -69,6 +69,11 @@ class TestNumberDefinitions:
         assert entity.native_min_value == 0
         assert entity.native_max_value == 255
 
+    def test_osdfade_range(self, coordinator):
+        entity = ArcanaNumberEntity(coordinator, "osdfade")
+        assert entity.native_min_value == 0
+        assert entity.native_max_value == 255
+
 
 class TestNumberState:
     """Test number state reading."""

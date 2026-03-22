@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 from custom_components.hdfury_arcana.button import (
     ArcanaButtonEntity,
+    ArcanaFactoryResetButtonEntity,
     ArcanaRefreshButtonEntity,
     BUTTONS,
 )
@@ -74,3 +75,16 @@ class TestRefreshButton:
         await entity.async_press()
 
         mock_client.set.assert_not_called()
+
+
+class TestFactoryResetButton:
+    """Test the factory reset button."""
+
+    async def test_press_sends_factoryreset_with_value_3(
+        self, coordinator, mock_client
+    ):
+        entity = ArcanaFactoryResetButtonEntity(coordinator)
+
+        await entity.async_press()
+
+        mock_client.set.assert_called_once_with("factoryreset", "3")

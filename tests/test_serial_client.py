@@ -191,6 +191,44 @@ class TestConnection:
         mock_writer.close.assert_called_once()
         assert not client.connected
 
+    async def test_disconnect_clears_reader_writer_refs(self, client):
+        mock_writer = MagicMock()
+        mock_writer.close = MagicMock()
+        mock_writer.wait_closed = AsyncMock()
+
+        client._writer = mock_writer
+        client._reader = AsyncMock()
+        client._connected = True
+
+        await client.disconnect()
+
+        assert client._reader is None
+        assert client._writer is None
+
+    async def test_double_disconnect_is_safe(self, client):
+        mock_writer = MagicMock()
+        mock_writer.close = MagicMock()
+        mock_writer.wait_closed = AsyncMock()
+
+        client._writer = mock_writer
+        client._connected = True
+
+        await client.disconnect()
+        await client.disconnect()
+
+    async def test_disconnect_handles_oserror_on_close(self, client):
+        mock_writer = MagicMock()
+        mock_writer.close = MagicMock()
+        mock_writer.wait_closed = AsyncMock(side_effect=OSError("already dead"))
+
+        client._writer = mock_writer
+        client._connected = True
+
+        await client.disconnect()
+
+        assert not client.connected
+        assert client._writer is None
+
     async def test_not_connected_by_default(self, client):
         assert not client.connected
 

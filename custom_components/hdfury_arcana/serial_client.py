@@ -44,8 +44,13 @@ class ArcanaSerialClient:
     async def disconnect(self) -> None:
         """Close the serial connection."""
         if self._writer is not None:
-            self._writer.close()
-            await self._writer.wait_closed()
+            try:
+                self._writer.close()
+                await self._writer.wait_closed()
+            except OSError:
+                pass
+        self._reader = None
+        self._writer = None
         self._connected = False
 
     async def get(self, param: str) -> str:

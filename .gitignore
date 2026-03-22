@@ -11,3 +11,4 @@ result
 .dolt/
 *.db
 .beads-credential-key
+.direnv/

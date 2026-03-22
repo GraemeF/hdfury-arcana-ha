@@ -13,7 +13,22 @@
   outputs = { self, nixpkgs, flake-utils, beads-src }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        # Go 1.25.8: nixpkgs has 1.25.7
+        # Remove when nixpkgs unstable ships Go >= 1.25.8
+        goOverlay = final: prev: {
+          go_1_25 = prev.go_1_25.overrideAttrs {
+            version = "1.25.8";
+            src = prev.fetchurl {
+              url = "https://go.dev/dl/go1.25.8.src.tar.gz";
+              hash = "sha256-6YjUokRqx/4/baoImljpk2pSo4E1Wt7ByJgyMKjWxZ4=";
+            };
+          };
+        };
+
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ goOverlay ];
+        };
 
         bd = pkgs.buildGoModule {
           pname = "beads";

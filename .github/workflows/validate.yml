@@ -20,7 +20,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install .[dev]
-      - run: ruff format --check custom_components/ tests/
-      - run: ruff check custom_components/ tests/
-      - run: pytest tests/ -v --tb=short
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+      - run: task test
+        env:
+          VERBOSE: "1"

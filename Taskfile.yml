@@ -61,12 +61,25 @@ tasks:
       - pyproject.toml
 
   # ============================================================================
+  # TRANSLATIONS: sync strings.json → translations/en.json
+  # ============================================================================
+
+  translations:
+    desc: Copy strings.json to translations/en.json
+    cmd: cp custom_components/hdfury_arcana/strings.json custom_components/hdfury_arcana/translations/en.json
+    sources:
+      - custom_components/hdfury_arcana/strings.json
+    generates:
+      - custom_components/hdfury_arcana/translations/en.json
+    method: checksum
+
+  # ============================================================================
   # TEST
   # ============================================================================
 
   unit-test:
     desc: Run unit tests
-    deps: [format-check, lint]
+    deps: [format-check, lint, translations]
     cmd: '{{.RUN_STEP}} "Unit tests" {{.VENV_PYTHON}} -m pytest tests/ -v --tb=short'
     sources:
       - custom_components/**/*.py

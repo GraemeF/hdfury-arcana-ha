@@ -1,0 +1,56 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select serial port",
+        "data": {
+          "serial_port": "Serial port"
+        }
+      },
+      "manual": {
+        "title": "Enter serial port",
+        "data": {
+          "serial_port": "Serial port path"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the device",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "firmware_version": { "name": "Firmware version" },
+      "serial_number": { "name": "Serial number" }
+    },
+    "switch": {
+      "earcsel": { "name": "eARC select" },
+      "arcsel": { "name": "ARC select" },
+      "earcdelaymode": { "name": "eARC delay mode" },
+      "lldvtohdrmode": { "name": "LLDV to HDR mode" }
+    },
+    "select": {
+      "scalemode": { "name": "Scale mode" },
+      "audiomode": { "name": "Audio mode" },
+      "hdrmode": { "name": "HDR mode" },
+      "lldvtohdrprimmode": { "name": "LLDV to HDR primaries mode" },
+      "audsource": { "name": "Audio source" }
+    },
+    "number": {
+      "hdrcustomvalue": { "name": "HDR custom value" },
+      "hdrboostvalue": { "name": "HDR boost value" },
+      "earcdelayvalue": { "name": "eARC delay" },
+      "lldvtohdrminlumvalue": { "name": "LLDV to HDR min luminance" },
+      "lldvtohdrmaxlumvalue": { "name": "LLDV to HDR max luminance" },
+      "osdcolorvalue": { "name": "OSD colour" }
+    },
+    "button": {
+      "hotplug": { "name": "Hotplug" },
+      "reboot": { "name": "Reboot" }
+    }
+  }
+}

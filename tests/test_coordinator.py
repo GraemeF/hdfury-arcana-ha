@@ -103,16 +103,12 @@ class TestSubsequentPolls:
 class TestErrorHandling:
     """Test coordinator error handling."""
 
-    async def test_serial_error_raises_update_failed(self, coordinator, mock_client):
+    async def test_connection_error_raises_update_failed(
+        self, coordinator, mock_client
+    ):
         mock_client.get = AsyncMock(side_effect=ConnectionError("port gone"))
 
         with pytest.raises(UpdateFailed, match="port gone"):
-            await coordinator._async_update_data()
-
-    async def test_timeout_raises_update_failed(self, coordinator, mock_client):
-        mock_client.get = AsyncMock(side_effect=asyncio.TimeoutError)
-
-        with pytest.raises(UpdateFailed):
             await coordinator._async_update_data()
 
     async def test_oserror_raises_update_failed(self, coordinator, mock_client):
@@ -125,6 +121,29 @@ class TestErrorHandling:
         mock_client.get = AsyncMock(
             side_effect=asyncio.IncompleteReadError(b"partial", 100)
         )
+
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+    async def test_single_param_timeout_skips_param(self, coordinator, mock_client):
+        responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
+
+        def get_with_timeout(p):
+            if p == "osd":
+                raise asyncio.TimeoutError()
+            return responses[p]
+
+        mock_client.get = AsyncMock(side_effect=get_with_timeout)
+
+        data = await coordinator._async_update_data()
+
+        assert "osd" not in data
+        assert data["scalemode"] == "scalemode_val"
+
+    async def test_all_params_timeout_raises_update_failed(
+        self, coordinator, mock_client
+    ):
+        mock_client.get = AsyncMock(side_effect=asyncio.TimeoutError)
 
         with pytest.raises(UpdateFailed):
             await coordinator._async_update_data()

@@ -28,7 +28,7 @@ def coordinator(
         "arcsel": "off",
         "earcdelaymode": "on",
         "lldvtohdrmode": "off",
-        "osd": "on",
+        "osdmode": "on",
     }
     return coord
 
@@ -45,7 +45,7 @@ class TestSwitchDefinitions:
         assert "lldvtohdrmode" in SWITCHES
 
     def test_osd_is_a_switch(self, coordinator):
-        assert "osd" in SWITCHES
+        assert "osdmode" in SWITCHES
 
 
 class TestSwitchState:

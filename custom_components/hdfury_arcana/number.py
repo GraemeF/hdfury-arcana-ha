@@ -30,7 +30,6 @@ NUMBERS: dict[str, NumberConfig] = {
     "lldvtohdrminlumvalue": NumberConfig(0, 10000),
     "lldvtohdrmaxlumvalue": NumberConfig(0, 10000),
     "osdcolorvalue": NumberConfig(0, 31),
-    "osdtimervalue": NumberConfig(0, 255),
     "osdfade": NumberConfig(0, 255),
 }
 

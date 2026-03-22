@@ -54,7 +54,7 @@
       "arcsel": { "name": "ARC select" },
       "earcdelaymode": { "name": "eARC delay mode" },
       "lldvtohdrmode": { "name": "LLDV to HDR mode" },
-      "osd": { "name": "OSD" }
+      "osdmode": { "name": "OSD" }
     },
     "select": {
       "scalemode": { "name": "Scale mode" },
@@ -70,7 +70,6 @@
       "lldvtohdrminlumvalue": { "name": "LLDV to HDR min luminance" },
       "lldvtohdrmaxlumvalue": { "name": "LLDV to HDR max luminance" },
       "osdcolorvalue": { "name": "OSD colour" },
-      "osdtimervalue": { "name": "OSD timer" },
       "osdfade": { "name": "OSD fade" }
     },
     "button": {

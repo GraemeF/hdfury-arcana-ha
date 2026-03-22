@@ -32,8 +32,7 @@ POLLED_PARAMS: list[str] = [
     "earcdelaymode",
     "earcdelayvalue",
     "osdcolorvalue",
-    "osd",
-    "osdtimervalue",
+    "osdmode",
     "osdfade",
 ]
 
@@ -106,16 +105,24 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
 
             data: dict[str, str] = {}
             for param in params_to_poll:
-                data[param] = await self._client.get(param)
+                try:
+                    data[param] = await self._client.get(param)
+                except asyncio.TimeoutError:
+                    _LOGGER.debug("Timeout polling %s, skipping", param)
+                    continue
+
+            if not data:
+                raise UpdateFailed("All params timed out")
 
             if not self._static_data:
+                if "ver" not in data or "serial" not in data:
+                    raise UpdateFailed("Could not fetch static params")
                 self._static_data = {p: data[p] for p in STATIC_PARAMS}
 
             return {**self._static_data, **data}
         except (
             ConnectionError,
             OSError,
-            asyncio.TimeoutError,
             asyncio.IncompleteReadError,
         ) as err:
             raise UpdateFailed(str(err)) from err
@@ -148,16 +155,23 @@ class ArcanaSignalCoordinator(DataUpdateCoordinator[dict[str, str]]):
         try:
             data: dict[str, str] = {}
             for param in SIGNAL_POLLED_PARAMS:
-                data[param] = await self._client.get(param)
+                try:
+                    data[param] = await self._client.get(param)
+                except asyncio.TimeoutError:
+                    _LOGGER.debug("Timeout polling %s, skipping", param)
+                    continue
 
             for param in STATUS_PARAMS:
-                data[param] = await self._client.get_status(param)
+                try:
+                    data[param] = await self._client.get_status(param)
+                except asyncio.TimeoutError:
+                    _LOGGER.debug("Timeout polling status %s, skipping", param)
+                    continue
 
             return {**self._static_data, **data}
         except (
             ConnectionError,
             OSError,
-            asyncio.TimeoutError,
             asyncio.IncompleteReadError,
         ) as err:
             raise UpdateFailed(str(err)) from err

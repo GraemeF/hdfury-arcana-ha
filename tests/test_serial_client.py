@@ -209,6 +209,23 @@ class TestTimeout:
                 await client.get("scalemode")
 
 
+class TestTimeoutDoesNotDisconnect:
+    """Test that a command timeout doesn't mark the connection as dead."""
+
+    async def test_timeout_keeps_connection_alive(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(side_effect=asyncio.TimeoutError)
+
+        client._reader = reader
+        client._writer = writer
+        client._connected = True
+
+        with pytest.raises(asyncio.TimeoutError):
+            await client.get("osd")
+
+        assert client.connected
+
+
 class TestLocking:
     """Test that serial access is serialised through the lock."""
 
@@ -390,19 +407,6 @@ class TestReconnect:
 
 class TestTransportErrorMarksDisconnected:
     """Test that transport errors during commands mark connection as failed."""
-
-    async def test_timeout_marks_disconnected(self, client, mock_serial_connection):
-        reader, writer = mock_serial_connection
-        reader.readuntil = AsyncMock(side_effect=asyncio.TimeoutError)
-
-        client._reader = reader
-        client._writer = writer
-        client._connected = True
-
-        with pytest.raises(asyncio.TimeoutError):
-            await client.get("scalemode")
-
-        assert not client.connected
 
     async def test_oserror_marks_disconnected(self, client, mock_serial_connection):
         reader, writer = mock_serial_connection

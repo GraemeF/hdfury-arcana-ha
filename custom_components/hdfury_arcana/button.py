@@ -31,4 +31,4 @@ class ArcanaButtonEntity(ArcanaEntity, ButtonEntity):
         self._attr_translation_key = key
 
     async def async_press(self) -> None:
-        await self.coordinator._client.set(self._key)
+        await self.coordinator.async_set(self._key)

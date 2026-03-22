@@ -64,5 +64,5 @@ class ArcanaNumberEntity(ArcanaEntity, NumberEntity):
         return None
 
     async def async_set_native_value(self, value: float) -> None:
-        await self.coordinator._client.set(self._key, str(int(value)))
+        await self.coordinator.async_set(self._key, str(int(value)))
         await self.coordinator.async_request_refresh()

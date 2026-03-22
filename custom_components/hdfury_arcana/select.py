@@ -61,5 +61,5 @@ class ArcanaSelectEntity(ArcanaEntity, SelectEntity):
         return self.coordinator.data.get(self._key)
 
     async def async_select_option(self, option: str) -> None:
-        await self.coordinator._client.set(self._key, option)
+        await self.coordinator.async_set(self._key, option)
         await self.coordinator.async_request_refresh()

@@ -54,6 +54,10 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
         self._client = ArcanaSerialClient(entry.data["serial_port"])
         self._static_data: dict[str, str] = {}
 
+    async def async_set(self, param: str, value: str | None = None) -> str:
+        """Send a set command to the device."""
+        return await self._client.set(param, value)
+
     async def async_disconnect(self) -> None:
         """Disconnect the serial client."""
         await self._client.disconnect()

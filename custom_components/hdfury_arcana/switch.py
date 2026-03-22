@@ -40,9 +40,9 @@ class ArcanaSwitchEntity(ArcanaEntity, SwitchEntity):
         return self.coordinator.data.get(self._key) == "on"
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.coordinator._client.set(self._key, "on")
+        await self.coordinator.async_set(self._key, "on")
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator._client.set(self._key, "off")
+        await self.coordinator.async_set(self._key, "off")
         await self.coordinator.async_request_refresh()

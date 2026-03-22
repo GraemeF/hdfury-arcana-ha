@@ -63,11 +63,11 @@ class TestButtonActions:
 
         await entity.async_press()
 
-        mock_client.set.assert_called_once_with("hotplug")
+        mock_client.set.assert_called_once_with("hotplug", None)
 
     async def test_reboot_sends_set_command(self, coordinator, mock_client):
         entity = ArcanaButtonEntity(coordinator, "reboot")
 
         await entity.async_press()
 
-        mock_client.set.assert_called_once_with("reboot")
+        mock_client.set.assert_called_once_with("reboot", None)

@@ -158,3 +158,21 @@ class TestConnection:
         await coordinator.async_disconnect()
 
         mock_client.disconnect.assert_called_once()
+
+
+class TestSendCommand:
+    """Test the public send_command API."""
+
+    async def test_delegates_set_to_client(self, coordinator, mock_client):
+        mock_client.set = AsyncMock()
+
+        await coordinator.async_set("scalemode", "auto")
+
+        mock_client.set.assert_called_once_with("scalemode", "auto")
+
+    async def test_delegates_set_without_value(self, coordinator, mock_client):
+        mock_client.set = AsyncMock()
+
+        await coordinator.async_set("hotplug")
+
+        mock_client.set.assert_called_once_with("hotplug", None)

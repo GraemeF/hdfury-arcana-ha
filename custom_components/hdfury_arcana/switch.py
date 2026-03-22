@@ -13,7 +13,7 @@ from . import ArcanaConfigEntry
 from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
 
-SWITCHES: list[str] = ["earcsel", "arcsel", "earcdelaymode", "lldvtohdrmode"]
+SWITCHES: list[str] = ["earcsel", "arcsel", "earcdelaymode", "lldvtohdrmode", "osd"]
 
 
 async def async_setup_entry(

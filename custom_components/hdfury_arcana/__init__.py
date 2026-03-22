@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant
 from .coordinator import ArcanaCoordinator
 
 PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
     Platform.BUTTON,
     Platform.NUMBER,
     Platform.SELECT,

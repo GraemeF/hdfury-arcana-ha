@@ -32,6 +32,11 @@ POLLED_PARAMS: list[str] = [
     "earcdelaymode",
     "earcdelayvalue",
     "osdcolorvalue",
+    "osd",
+    "osdtimervalue",
+    "rxin5v",
+    "txhpd",
+    "txtmds",
 ]
 
 STATIC_PARAMS: list[str] = [

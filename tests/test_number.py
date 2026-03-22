@@ -30,6 +30,7 @@ def coordinator(
         "lldvtohdrminlumvalue": "0",
         "lldvtohdrmaxlumvalue": "10000",
         "osdcolorvalue": "32",
+        "osdtimervalue": "30",
     }
     return coord
 
@@ -62,6 +63,11 @@ class TestNumberDefinitions:
         entity = ArcanaNumberEntity(coordinator, "hdrboostvalue")
         assert entity.native_min_value == -5000
         assert entity.native_max_value == 5000
+
+    def test_osdtimervalue_range(self, coordinator):
+        entity = ArcanaNumberEntity(coordinator, "osdtimervalue")
+        assert entity.native_min_value == 0
+        assert entity.native_max_value == 255
 
 
 class TestNumberState:

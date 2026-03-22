@@ -23,6 +23,11 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "rxin5v": { "name": "Input 5V" },
+      "txhpd": { "name": "Output hotplug" },
+      "txtmds": { "name": "Output TMDS" }
+    },
     "sensor": {
       "firmware_version": { "name": "Firmware version" },
       "serial_number": { "name": "Serial number" }
@@ -31,7 +36,8 @@
       "earcsel": { "name": "eARC select" },
       "arcsel": { "name": "ARC select" },
       "earcdelaymode": { "name": "eARC delay mode" },
-      "lldvtohdrmode": { "name": "LLDV to HDR mode" }
+      "lldvtohdrmode": { "name": "LLDV to HDR mode" },
+      "osd": { "name": "OSD" }
     },
     "select": {
       "scalemode": { "name": "Scale mode" },
@@ -46,7 +52,8 @@
       "earcdelayvalue": { "name": "eARC delay" },
       "lldvtohdrminlumvalue": { "name": "LLDV to HDR min luminance" },
       "lldvtohdrmaxlumvalue": { "name": "LLDV to HDR max luminance" },
-      "osdcolorvalue": { "name": "OSD colour" }
+      "osdcolorvalue": { "name": "OSD colour" },
+      "osdtimervalue": { "name": "OSD timer" }
     },
     "button": {
       "hotplug": { "name": "Hotplug" },

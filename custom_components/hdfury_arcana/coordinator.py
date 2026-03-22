@@ -37,6 +37,17 @@ POLLED_PARAMS: list[str] = [
     "rxin5v",
     "txhpd",
     "txtmds",
+    "audiochtx",
+    "audiopcm",
+]
+
+STATUS_PARAMS: list[str] = [
+    "rx",
+    "tx",
+    "txcaps",
+    "aud",
+    "earc",
+    "spd",
 ]
 
 STATIC_PARAMS: list[str] = [
@@ -90,6 +101,9 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
             data: dict[str, str] = {}
             for param in params_to_poll:
                 data[param] = await self._client.get(param)
+
+            for param in STATUS_PARAMS:
+                data[param] = await self._client.get_status(param)
 
             if not self._static_data:
                 self._static_data = {p: data[p] for p in STATIC_PARAMS}

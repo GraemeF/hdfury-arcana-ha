@@ -12,6 +12,18 @@ from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
 
 
+SIGNAL_SENSORS: list[str] = [
+    "rx",
+    "tx",
+    "txcaps",
+    "aud",
+    "earc",
+    "spd",
+    "audiochtx",
+    "audiopcm",
+]
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ArcanaConfigEntry,
@@ -19,12 +31,12 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensor entities."""
     coordinator = entry.runtime_data.coordinator
-    async_add_entities(
-        [
-            ArcanaFirmwareSensor(coordinator),
-            ArcanaSerialSensor(coordinator),
-        ]
-    )
+    entities: list[SensorEntity] = [
+        ArcanaFirmwareSensor(coordinator),
+        ArcanaSerialSensor(coordinator),
+    ]
+    entities.extend(ArcanaDiagnosticSensor(coordinator, key) for key in SIGNAL_SENSORS)
+    async_add_entities(entities)
 
 
 class ArcanaFirmwareSensor(ArcanaEntity, SensorEntity):
@@ -57,3 +69,19 @@ class ArcanaSerialSensor(ArcanaEntity, SensorEntity):
         if self.coordinator.data is None:
             return None
         return self.coordinator.data.get("serial")
+
+
+class ArcanaDiagnosticSensor(ArcanaEntity, SensorEntity):
+    """Read-only diagnostic sensor for signal status parameters."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator: ArcanaCoordinator, key: str) -> None:
+        super().__init__(coordinator, key)
+        self._attr_translation_key = key
+
+    @property
+    def native_value(self) -> str | None:
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get(self._key)

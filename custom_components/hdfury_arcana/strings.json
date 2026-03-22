@@ -30,7 +30,15 @@
     },
     "sensor": {
       "firmware_version": { "name": "Firmware version" },
-      "serial_number": { "name": "Serial number" }
+      "serial_number": { "name": "Serial number" },
+      "rx": { "name": "Input signal" },
+      "tx": { "name": "Output signal" },
+      "txcaps": { "name": "Display capabilities" },
+      "aud": { "name": "Audio output" },
+      "earc": { "name": "eARC audio" },
+      "spd": { "name": "Source device" },
+      "audiochtx": { "name": "Audio channels" },
+      "audiopcm": { "name": "Audio encoding" }
     },
     "switch": {
       "earcsel": { "name": "eARC select" },

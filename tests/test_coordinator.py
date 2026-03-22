@@ -13,6 +13,7 @@ from custom_components.hdfury_arcana.coordinator import (
     ArcanaCoordinator,
     POLLED_PARAMS,
     STATIC_PARAMS,
+    STATUS_PARAMS,
 )
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -50,6 +51,30 @@ class TestFirstPoll:
         for param in POLLED_PARAMS:
             mock_client.get.assert_any_call(param)
             assert data[param] == f"{param}_val"
+
+
+class TestStatusParams:
+    """Test that status subcommands are polled via get_status."""
+
+    async def test_polls_status_params(self, coordinator, mock_client):
+        all_responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
+        mock_client.get = AsyncMock(side_effect=lambda p: all_responses[p])
+        status_responses = {p: f"{p}_status" for p in STATUS_PARAMS}
+        mock_client.get_status = AsyncMock(side_effect=lambda p: status_responses[p])
+
+        data = await coordinator._async_update_data()
+
+        for param in STATUS_PARAMS:
+            mock_client.get_status.assert_any_call(param)
+            assert data[param] == f"{param}_status"
+
+    async def test_status_error_raises_update_failed(self, coordinator, mock_client):
+        all_responses = {p: f"{p}_val" for p in POLLED_PARAMS + STATIC_PARAMS}
+        mock_client.get = AsyncMock(side_effect=lambda p: all_responses[p])
+        mock_client.get_status = AsyncMock(side_effect=ConnectionError("port gone"))
+
+        with pytest.raises(UpdateFailed, match="port gone"):
+            await coordinator._async_update_data()
 
 
 class TestSubsequentPolls:

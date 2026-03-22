@@ -64,6 +64,14 @@ class ArcanaSerialClient:
             return parts[1]
         return response
 
+    async def get_status(self, sub: str) -> str:
+        """Send a get status subcommand and return the value after the prefix."""
+        response = await self._send_command(f"#arcana get status {sub}\r")
+        # Response is "PREFIX: value" — strip everything up to and including first ":"
+        if ":" in response:
+            return response.split(":", 1)[1].strip()
+        return response
+
     async def set(self, param: str, value: str | None = None) -> str:
         """Send a set command and return the response."""
         if value is not None:

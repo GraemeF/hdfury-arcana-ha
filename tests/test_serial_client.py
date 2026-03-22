@@ -122,6 +122,63 @@ class TestResponseParsing:
 
         assert result == "0.88"
 
+    async def test_get_status_sends_correct_command(
+        self, client, mock_serial_connection
+    ):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(
+            return_value=b"RX: 4K23.97 297MHz 444 BT709 8b\r\n"
+        )
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get_status("rx")
+
+        writer.write.assert_called_once_with(b"#arcana get status rx\r")
+        assert result == "4K23.97 297MHz 444 BT709 8b"
+
+    async def test_get_status_strips_prefix(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(return_value=b"TXCAPS: LG TV: 4K60 444 BT2020\r\n")
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get_status("txcaps")
+
+        assert result == "LG TV: 4K60 444 BT2020"
+
+    async def test_get_status_eaud_prefix(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(return_value=b"EAUD: LPCM 44.1kHz 2.0ch 24bit\r\n")
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get_status("earc")
+
+        assert result == "LPCM 44.1kHz 2.0ch 24bit"
+
+    async def test_get_status_empty_response(self, client, mock_serial_connection):
+        reader, writer = mock_serial_connection
+        reader.readuntil = AsyncMock(return_value=b"SPD:\r\n")
+
+        with (
+            patch.object(client, "_reader", reader),
+            patch.object(client, "_writer", writer),
+            patch.object(client, "_connected", True),
+        ):
+            result = await client.get_status("spd")
+
+        assert result == ""
+
     async def test_handles_negative_values(self, client, mock_serial_connection):
         reader, writer = mock_serial_connection
         reader.readuntil = AsyncMock(return_value=b"hdrboostvalue -500\r\n")

@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from serial_asyncio_fast import open_serial_connection
+
+_LOGGER = logging.getLogger(__name__)
 
 BAUD_RATE = 19200
 COMMAND_TIMEOUT = 2.0
@@ -13,12 +16,17 @@ COMMAND_TIMEOUT = 2.0
 class ArcanaSerialClient:
     """Async serial client for the HDFury Arcana."""
 
+    INITIAL_BACKOFF = 1.0
+    MAX_BACKOFF = 60.0
+    MAX_RETRIES = 3
+
     def __init__(self, port: str) -> None:
         self._port = port
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
         self._connected = False
         self._lock = asyncio.Lock()
+        self._backoff_delay = self.INITIAL_BACKOFF
 
     @property
     def connected(self) -> bool:
@@ -31,6 +39,7 @@ class ArcanaSerialClient:
             url=self._port, baudrate=BAUD_RATE, bytesize=8, parity="N", stopbits=1
         )
         self._connected = True
+        self._backoff_delay = self.INITIAL_BACKOFF
 
     async def disconnect(self) -> None:
         """Close the serial connection."""
@@ -51,9 +60,30 @@ class ArcanaSerialClient:
             cmd = f"#arcana set {param}\r"
         return await self._send_command(cmd)
 
+    async def _ensure_connected(self) -> None:
+        """Reconnect with exponential backoff if not connected."""
+        if self._connected:
+            return
+
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                await self.connect()
+                return
+            except (ConnectionError, OSError):
+                if attempt == self.MAX_RETRIES - 1:
+                    raise
+                _LOGGER.debug(
+                    "Connection attempt %d failed, retrying in %.1fs",
+                    attempt + 1,
+                    self._backoff_delay,
+                )
+                await asyncio.sleep(self._backoff_delay)
+                self._backoff_delay = min(self._backoff_delay * 2, self.MAX_BACKOFF)
+
     async def _send_command(self, cmd: str) -> str:
         """Send a command under lock with timeout, return stripped response."""
         async with self._lock:
+            await self._ensure_connected()
             self._writer.write(cmd.encode())
             raw = await asyncio.wait_for(
                 self._reader.readuntil(b"\r\n"), timeout=COMMAND_TIMEOUT

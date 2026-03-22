@@ -193,3 +193,71 @@ class TestConnection:
 
     async def test_not_connected_by_default(self, client):
         assert not client.connected
+
+
+class TestReconnect:
+    """Test automatic reconnection with exponential backoff."""
+
+    async def test_reconnects_on_send_when_disconnected(self, client):
+        mock_reader = AsyncMock()
+        mock_reader.readuntil = AsyncMock(return_value=b"ok\r\n")
+        mock_writer = MagicMock()
+        mock_writer.write = MagicMock()
+
+        with patch(
+            "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+            new_callable=AsyncMock,
+            return_value=(mock_reader, mock_writer),
+        ) as mock_open:
+            result = await client.get("ver")
+
+        mock_open.assert_called_once()
+        assert result == "ok"
+
+    async def test_backoff_increases_on_repeated_failures(self, client):
+        attempt_times = []
+
+        async def failing_connect(*args, **kwargs):
+            attempt_times.append(asyncio.get_event_loop().time())
+            raise ConnectionError("nope")
+
+        with patch(
+            "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+            new_callable=AsyncMock,
+            side_effect=failing_connect,
+        ):
+            with pytest.raises(ConnectionError):
+                await client.get("ver")
+
+        # Should have attempted multiple times
+        assert len(attempt_times) > 1
+        # Gaps between attempts should increase
+        gaps = [
+            attempt_times[i + 1] - attempt_times[i]
+            for i in range(len(attempt_times) - 1)
+        ]
+        assert gaps[-1] > gaps[0]
+
+    async def test_backoff_resets_after_successful_reconnect(self, client):
+        call_count = 0
+        mock_reader = AsyncMock()
+        mock_reader.readuntil = AsyncMock(return_value=b"ok\r\n")
+        mock_writer = MagicMock()
+        mock_writer.write = MagicMock()
+
+        async def flaky_connect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ConnectionError("nope")
+            return mock_reader, mock_writer
+
+        with patch(
+            "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+            new_callable=AsyncMock,
+            side_effect=flaky_connect,
+        ):
+            await client.get("ver")
+
+        assert client.connected
+        assert client._backoff_delay == client.INITIAL_BACKOFF

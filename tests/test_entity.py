@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
-
 import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -13,26 +11,6 @@ from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 from custom_components.hdfury_arcana.entity import ArcanaEntity
 
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-
-
-@pytest.fixture
-def mock_config_entry(hass: HomeAssistant) -> MockConfigEntry:
-    """Create a mock config entry."""
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        data={"serial_port": "/dev/ttyUSB0"},
-        unique_id="ABC123",
-    )
-    entry.add_to_hass(hass)
-    return entry
-
-
-@pytest.fixture
-def mock_client():
-    """Create a mock serial client."""
-    client = AsyncMock()
-    client.connected = True
-    return client
 
 
 @pytest.fixture

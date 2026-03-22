@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
@@ -125,6 +126,18 @@ class TestErrorHandling:
         mock_client.get = AsyncMock(side_effect=ConnectionError("port gone"))
 
         with pytest.raises(UpdateFailed, match="port gone"):
+            await coordinator._async_update_data()
+
+    async def test_timeout_raises_update_failed(self, coordinator, mock_client):
+        mock_client.get = AsyncMock(side_effect=asyncio.TimeoutError)
+
+        with pytest.raises(UpdateFailed):
+            await coordinator._async_update_data()
+
+    async def test_oserror_raises_update_failed(self, coordinator, mock_client):
+        mock_client.get = AsyncMock(side_effect=OSError("device gone"))
+
+        with pytest.raises(UpdateFailed, match="device gone"):
             await coordinator._async_update_data()
 
 

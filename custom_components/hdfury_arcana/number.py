@@ -25,11 +25,11 @@ class NumberConfig:
 
 NUMBERS: dict[str, NumberConfig] = {
     "hdrcustomvalue": NumberConfig(0, 10000),
-    "hdrboostvalue": NumberConfig(0, 100),
-    "earcdelayvalue": NumberConfig(0, 200),
+    "hdrboostvalue": NumberConfig(-5000, 5000),
+    "earcdelayvalue": NumberConfig(0, 255),
     "lldvtohdrminlumvalue": NumberConfig(0, 10000),
     "lldvtohdrmaxlumvalue": NumberConfig(0, 10000),
-    "osdcolorvalue": NumberConfig(0, 63),
+    "osdcolorvalue": NumberConfig(0, 31),
 }
 
 

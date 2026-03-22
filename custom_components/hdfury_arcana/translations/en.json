@@ -25,7 +25,8 @@
   "entity": {
     "sensor": {
       "firmware_version": { "name": "Firmware version" },
-      "serial_number": { "name": "Serial number" }
+      "serial_number": { "name": "Serial number" },
+      "audiomode": { "name": "Audio mode" }
     },
     "switch": {
       "earcsel": { "name": "eARC select" },
@@ -35,7 +36,6 @@
     },
     "select": {
       "scalemode": { "name": "Scale mode" },
-      "audiomode": { "name": "Audio mode" },
       "hdrmode": { "name": "HDR mode" },
       "lldvtohdrprimmode": { "name": "LLDV to HDR primaries mode" },
       "audsource": { "name": "Audio source" }

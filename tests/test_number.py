@@ -48,15 +48,20 @@ class TestNumberDefinitions:
         assert entity.native_max_value == 10000
         assert entity.native_step == 1
 
-    def test_hdrboostvalue_range(self, coordinator):
-        entity = ArcanaNumberEntity(coordinator, "hdrboostvalue")
-        assert entity.native_min_value == 0
-        assert entity.native_max_value == 100
-
     def test_osdcolorvalue_range(self, coordinator):
         entity = ArcanaNumberEntity(coordinator, "osdcolorvalue")
         assert entity.native_min_value == 0
-        assert entity.native_max_value == 63
+        assert entity.native_max_value == 31
+
+    def test_earcdelayvalue_range(self, coordinator):
+        entity = ArcanaNumberEntity(coordinator, "earcdelayvalue")
+        assert entity.native_min_value == 0
+        assert entity.native_max_value == 255
+
+    def test_hdrboostvalue_range(self, coordinator):
+        entity = ArcanaNumberEntity(coordinator, "hdrboostvalue")
+        assert entity.native_min_value == -5000
+        assert entity.native_max_value == 5000
 
 
 class TestNumberState:

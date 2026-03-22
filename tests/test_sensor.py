@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 from custom_components.hdfury_arcana.sensor import (
+    ArcanaAudioModeSensor,
     ArcanaFirmwareSensor,
     ArcanaSerialSensor,
 )
@@ -56,6 +57,20 @@ class TestSerialSensor:
     def test_unique_id(self, coordinator):
         sensor = ArcanaSerialSensor(coordinator)
         assert sensor.unique_id == "ABC123_serial"
+
+
+class TestAudioModeSensor:
+    """Test the audio mode sensor."""
+
+    def test_native_value(self, coordinator):
+        coordinator.data["audiomode"] = "auto"
+        sensor = ArcanaAudioModeSensor(coordinator)
+        assert sensor.native_value == "auto"
+
+    def test_entity_category_is_diagnostic(self, coordinator):
+        coordinator.data["audiomode"] = "auto"
+        sensor = ArcanaAudioModeSensor(coordinator)
+        assert sensor.entity_category == EntityCategory.DIAGNOSTIC
 
 
 class TestNoneData:

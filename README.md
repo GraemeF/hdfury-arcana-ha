@@ -31,36 +31,36 @@ Copy the `custom_components/hdfury_arcana` directory into your Home Assistant `c
 |--------|-------------|
 | Firmware version | Device firmware version |
 | Serial number | Device serial number |
+| Audio mode | Current audio mode (read-only, always auto) |
 
 ### Switches
 
 | Entity | Description |
 |--------|-------------|
-| eARC select | Enable/disable eARC output |
-| ARC select | Enable/disable ARC output |
+| eARC select | Enable/disable eARC output (may be locked by physical connection state) |
+| ARC select | Enable/disable ARC output (may be locked by physical connection state) |
 | eARC delay mode | Enable/disable eARC audio delay |
+| LLDV to HDR mode | Enable/disable Dolby Vision to HDR tone mapping |
 
 ### Selects
 
 | Entity | Options |
 |--------|---------|
 | Scale mode | auto, none, 4k60_420_10_hdr, 4k60_420_10_sdr, 4k60_420_8_hdr, 4k60_420_8_sdr, 4k30_444_8_hdr, 4k30_444_8_sdr, 1080p60_12_hdr, 1080p60_12_sdr, 1080p60_8_sdr |
-| Audio mode | auto |
-| HDR mode | auto, off, force1000 |
-| LLDV to HDR mode | off, on |
-| LLDV to HDR primaries mode | bt2020, dci-p3 |
-| Audio source | hdmi, tv |
+| HDR mode | auto, off, force1000, custom |
+| LLDV to HDR primaries mode | bt2020, dci-p3 (may require active LLDV content) |
+| Audio source | hdmi, tv (may require active ARC connection) |
 
 ### Numbers
 
 | Entity | Range | Description |
 |--------|-------|-------------|
 | HDR custom value | 0–10000 | Custom HDR nits value |
-| HDR boost value | 0–100 | HDR boost percentage |
-| eARC delay | 0–200 ms | Audio delay compensation |
+| HDR boost value | -5000–5000 | HDR boost/dim adjustment |
+| eARC delay | 0–255 ms | Audio delay compensation |
 | LLDV to HDR min luminance | 0–10000 | Minimum luminance for DV→HDR |
 | LLDV to HDR max luminance | 0–10000 | Maximum luminance for DV→HDR |
-| OSD colour | 0–63 | On-screen display colour value |
+| OSD colour | 0–31 | On-screen display colour value |
 
 ### Buttons
 

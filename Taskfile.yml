@@ -1,0 +1,81 @@
+# Taskfile.yml — HDFury Arcana HA integration build pipeline
+#
+# Usage:
+#   task test            # Full pipeline — the "safe to merge" gate
+#   task unit-test       # Unit tests only (runs format-check first)
+#   task --force test    # Force re-run everything
+#
+# Caching: Each task declares its source files. If no inputs changed since the
+# last successful run, the task is skipped. Cache state lives in .task/.
+#
+# Dependency graph:
+#
+#   format-check → unit-test → test
+
+version: "3"
+
+vars:
+  RUN_STEP: ./scripts/run-step.sh
+  VENV_PYTHON: .venv/bin/python
+
+tasks:
+  # ============================================================================
+  # SETUP: install deps (cached — only re-runs when lockfiles change)
+  # ============================================================================
+
+  setup:
+    desc: Create venv and install dependencies
+    cmd: '{{.RUN_STEP}} "Install deps" sh -c "python -m venv .venv && .venv/bin/pip install -e .[dev]"'
+    sources:
+      - pyproject.toml
+      - flake.lock
+
+  # ============================================================================
+  # FORMAT
+  # ============================================================================
+
+  format:
+    desc: Format Python code with ruff
+    cmd: '{{.RUN_STEP}} "Format" {{.VENV_PYTHON}} -m ruff format custom_components/ tests/'
+
+  format-check:
+    desc: Check Python formatting
+    deps: [setup]
+    cmd: '{{.RUN_STEP}} "Format check" {{.VENV_PYTHON}} -m ruff format --check custom_components/ tests/'
+    sources:
+      - custom_components/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+
+  lint:
+    desc: Run ruff linter
+    deps: [setup]
+    cmd: '{{.RUN_STEP}} "Lint" {{.VENV_PYTHON}} -m ruff check custom_components/ tests/'
+    sources:
+      - custom_components/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+
+  # ============================================================================
+  # TEST
+  # ============================================================================
+
+  unit-test:
+    desc: Run unit tests with coverage
+    deps: [format-check, lint]
+    cmd: '{{.RUN_STEP}} "Unit tests" {{.VENV_PYTHON}} -m pytest tests/ -v --tb=short'
+    sources:
+      - custom_components/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+
+  # ============================================================================
+  # TEST: the comprehensive "safe to merge" gate
+  # ============================================================================
+
+  test:
+    desc: "Full pipeline: setup → format-check + lint → unit-test"
+    deps: [unit-test]
+    cmd: |
+      echo ""
+      echo "All checks and tests passed"

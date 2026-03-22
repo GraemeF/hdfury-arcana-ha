@@ -6,10 +6,10 @@ from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.const import EntityCategory
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import ArcanaConfigEntry
 from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
 
@@ -18,7 +18,7 @@ SWITCHES: list[str] = ["earcsel", "arcsel", "earcdelaymode"]
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: ArcanaConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up switch entities."""

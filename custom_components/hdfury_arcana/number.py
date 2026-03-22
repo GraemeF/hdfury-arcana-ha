@@ -6,10 +6,10 @@ from dataclasses import dataclass
 
 from homeassistant.components.number import NumberEntity
 from homeassistant.const import EntityCategory
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import ArcanaConfigEntry
 from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
 
@@ -35,7 +35,7 @@ NUMBERS: dict[str, NumberConfig] = {
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: ArcanaConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up number entities."""

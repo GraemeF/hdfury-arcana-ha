@@ -23,7 +23,6 @@ async def async_setup_entry(
         [
             ArcanaFirmwareSensor(coordinator),
             ArcanaSerialSensor(coordinator),
-            ArcanaAudioModeSensor(coordinator),
         ]
     )
 
@@ -58,19 +57,3 @@ class ArcanaSerialSensor(ArcanaEntity, SensorEntity):
         if self.coordinator.data is None:
             return None
         return self.coordinator.data.get("serial")
-
-
-class ArcanaAudioModeSensor(ArcanaEntity, SensorEntity):
-    """Sensor showing the audio mode (read-only, always auto)."""
-
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-
-    def __init__(self, coordinator: ArcanaCoordinator) -> None:
-        super().__init__(coordinator, "audiomode")
-        self._attr_translation_key = "audiomode"
-
-    @property
-    def native_value(self) -> str | None:
-        if self.coordinator.data is None:
-            return None
-        return self.coordinator.data.get("audiomode")

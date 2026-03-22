@@ -42,8 +42,9 @@ class TestSelectDefinitions:
             entity = ArcanaSelectEntity(coordinator, key)
             assert entity.entity_category == EntityCategory.CONFIG
 
-    def test_audiomode_is_not_a_select(self, coordinator):
-        assert "audiomode" not in SELECTS
+    def test_audiomode_options(self, coordinator):
+        entity = ArcanaSelectEntity(coordinator, "audiomode")
+        assert entity.options == ["auto", "display", "earc", "both"]
 
     def test_lldvtohdrmode_is_not_a_select(self, coordinator):
         assert "lldvtohdrmode" not in SELECTS

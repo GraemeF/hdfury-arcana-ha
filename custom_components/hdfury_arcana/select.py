@@ -28,6 +28,7 @@ SELECTS: dict[str, list[str]] = {
     "hdrmode": ["auto", "off", "force1000", "custom"],
     "lldvtohdrprimmode": ["bt2020", "dci-p3"],
     "audsource": ["hdmi", "tv"],
+    "audiomode": ["auto", "display", "earc", "both"],
 }
 
 

@@ -60,6 +60,10 @@ STATIC_PARAMS: list[str] = [
 
 DEFAULT_SIGNAL_POLL_INTERVAL = 30
 
+# Some firmware never answers some signal params, and each unanswered get costs
+# a full command timeout on every poll.
+TIMEOUTS_BEFORE_GIVING_UP_ON_SILENT_PARAM = 3
+
 
 class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
     """Coordinator that polls Arcana settings over serial."""
@@ -149,17 +153,38 @@ class ArcanaSignalCoordinator(DataUpdateCoordinator[dict[str, str]]):
         )
         self._client = client
         self._static_data = static_data
+        self._answered_params: set[str] = set()
+        self._silent_param_timeouts: dict[str, int] = {}
+
+    def _gave_up_on(self, param: str) -> bool:
+        return (
+            self._silent_param_timeouts.get(param, 0)
+            >= TIMEOUTS_BEFORE_GIVING_UP_ON_SILENT_PARAM
+        )
+
+    def _record_timeout(self, param: str) -> None:
+        if param in self._answered_params:
+            return
+        self._silent_param_timeouts[param] = (
+            self._silent_param_timeouts.get(param, 0) + 1
+        )
+        if self._gave_up_on(param):
+            _LOGGER.debug("%s has never answered, no longer polling it", param)
 
     async def _async_update_data(self) -> dict[str, str]:
         """Fetch signal status data from the Arcana."""
         try:
             data: dict[str, str] = {}
             for param in SIGNAL_POLLED_PARAMS:
+                if self._gave_up_on(param):
+                    continue
                 try:
                     data[param] = await self._client.get(param)
                 except TimeoutError:
                     _LOGGER.debug("Timeout polling %s, skipping", param)
+                    self._record_timeout(param)
                     continue
+                self._answered_params.add(param)
 
             for param in STATUS_PARAMS:
                 try:

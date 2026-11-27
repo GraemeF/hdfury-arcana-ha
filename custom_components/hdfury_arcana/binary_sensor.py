@@ -37,6 +37,6 @@ class ArcanaBinarySensorEntity(ArcanaEntity, BinarySensorEntity):
 
     @property
     def is_on(self) -> bool | None:
-        if self.coordinator.data is None:
+        if self.coordinator.data is None or self._key not in self.coordinator.data:
             return None
-        return self.coordinator.data.get(self._key) == "on"
+        return self.coordinator.data[self._key] == "on"

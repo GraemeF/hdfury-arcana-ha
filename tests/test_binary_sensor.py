@@ -60,6 +60,11 @@ class TestBinarySensorState:
         entity = ArcanaBinarySensorEntity(coordinator, "txhpd")
         assert entity.is_on is False
 
+    def test_is_unknown_when_param_did_not_answer(self, coordinator):
+        del coordinator.data["txtmds"]
+        entity = ArcanaBinarySensorEntity(coordinator, "txtmds")
+        assert entity.is_on is None
+
 
 class TestNoneData:
     """Test binary sensor with None coordinator data."""

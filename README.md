@@ -108,6 +108,8 @@ After setup, go to the integration's options to configure:
 | Output hotplug | Whether a display is connected. |
 | Output TMDS | Whether video signal is actively being transmitted. |
 
+A binary sensor reads unknown when the Arcana does not answer for it. Some firmware, such as 0.88, never answers for these three. The integration stops asking after three unanswered polls in a row, until it reloads, but keeps asking for any that has answered.
+
 ## Notes
 
 - **eARC/ARC select** may be hardware-locked depending on what is physically connected to the Arcana — the device rejects writes if the connection state doesn't support the mode.

@@ -297,6 +297,21 @@ class TestConnection:
 
         assert not client.connected
 
+    async def test_unknown_network_port_name_is_a_connection_error(self, client):
+        with (
+            patch(
+                "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+                new_callable=AsyncMock,
+                side_effect=ValueError(
+                    "Serial proxy with name 'Port 9' does not exist"
+                ),
+            ),
+            pytest.raises(ConnectionError, match="Port 9"),
+        ):
+            await client.connect()
+
+        assert not client.connected
+
     async def test_disconnect_closes_writer(self, client):
         mock_writer = MagicMock()
         mock_writer.close = MagicMock()

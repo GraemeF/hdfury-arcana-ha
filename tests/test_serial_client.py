@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from serialx import SerialException
 
 from custom_components.hdfury_arcana.serial_client import ArcanaSerialClient
 
@@ -277,9 +279,22 @@ class TestConnection:
             await client.connect()
 
         mock_open.assert_called_once_with(
-            url="/dev/ttyUSB0", baudrate=19200, bytesize=8, parity="N", stopbits=1
+            url="/dev/ttyUSB0", baudrate=19200, byte_size=8, parity="N", stopbits=1
         )
         assert client.connected
+
+    async def test_serial_error_on_open_is_a_connection_error(self, client):
+        with (
+            patch(
+                "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+                new_callable=AsyncMock,
+                side_effect=SerialException("port busy"),
+            ),
+            pytest.raises(ConnectionError, match="port busy"),
+        ):
+            await client.connect()
+
+        assert not client.connected
 
     async def test_disconnect_closes_writer(self, client):
         mock_writer = MagicMock()
@@ -382,6 +397,23 @@ class TestReconnect:
         ]
         assert gaps[-1] > gaps[0]
 
+    async def test_retries_after_serial_error_on_open(self, client):
+        mock_reader = AsyncMock()
+        mock_reader.readuntil = AsyncMock(return_value=b"ok\r\n")
+        mock_writer = MagicMock()
+        mock_writer.write = MagicMock()
+
+        client._backoff_delay = 0
+
+        with patch(
+            "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+            new_callable=AsyncMock,
+            side_effect=[SerialException("port busy"), (mock_reader, mock_writer)],
+        ):
+            result = await client.get("ver")
+
+        assert result == "ok"
+
     async def test_backoff_resets_after_successful_reconnect(self, client):
         call_count = 0
         mock_reader = AsyncMock()
@@ -439,3 +471,36 @@ class TestTransportErrorMarksDisconnected:
             await client.get("scalemode")
 
         assert not client.connected
+
+
+class TestRealSerialDevice:
+    """Talk to a fake Arcana on the far side of a pseudo-terminal."""
+
+    @pytest.fixture
+    def arcana_pty(self):
+        """Open a pseudo-terminal whose far end answers like an Arcana."""
+        controller, device = os.openpty()
+        yield controller, os.ttyname(device)
+        os.close(device)
+        os.close(controller)
+
+    async def test_get_round_trip_over_a_tty_device_path(self, arcana_pty):
+        controller, device_path = arcana_pty
+        received = bytearray()
+        loop = asyncio.get_running_loop()
+
+        def answer_like_an_arcana():
+            received.extend(os.read(controller, 1024))
+            if received.endswith(b"\r"):
+                os.write(controller, b"ARCANA VER: 0.88\r\n")
+
+        loop.add_reader(controller, answer_like_an_arcana)
+        client = ArcanaSerialClient(device_path)
+        try:
+            version = await client.get("ver")
+        finally:
+            await client.disconnect()
+            loop.remove_reader(controller)
+
+        assert version == "0.88"
+        assert bytes(received) == b"#arcana get ver\r"

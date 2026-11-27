@@ -8,7 +8,7 @@ import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
-from serial.tools.list_ports import comports
+from serialx import async_list_serial_ports
 
 from .const import DOMAIN
 from .coordinator import DEFAULT_SIGNAL_POLL_INTERVAL
@@ -17,6 +17,11 @@ from .serial_client import ArcanaSerialClient
 _LOGGER = logging.getLogger(__name__)
 
 MANUAL_ENTRY = "Enter manually..."
+
+
+async def _async_detected_ports() -> list[str]:
+    """Return the device path of each serial port on the host."""
+    return [port.device for port in await async_list_serial_ports()]
 
 
 class ArcanaOptionsFlow(config_entries.OptionsFlow):
@@ -60,8 +65,7 @@ class ArcanaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle port selection step."""
         errors: dict[str, str] = {}
 
-        ports = await self.hass.async_add_executor_job(comports)
-        port_list = [p.device for p in ports]
+        port_list = await _async_detected_ports()
 
         if not port_list:
             return await self.async_step_manual()
@@ -117,8 +121,7 @@ class ArcanaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if step_id == "manual":
             schema = vol.Schema({vol.Required("serial_port"): str})
         else:
-            ports = await self.hass.async_add_executor_job(comports)
-            port_list = [p.device for p in ports] + [MANUAL_ENTRY]
+            port_list = [*await _async_detected_ports(), MANUAL_ENTRY]
             schema = vol.Schema({vol.Required("serial_port"): vol.In(port_list)})
         return self.async_show_form(step_id=step_id, data_schema=schema, errors=errors)
 

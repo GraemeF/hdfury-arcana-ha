@@ -266,3 +266,103 @@ class TestSignalCoordinator:
         called_params = [call.args[0] for call in mock_client.get.call_args_list]
         assert "scalemode" not in called_params
         assert "hdrmode" not in called_params
+
+
+class TestSignalParamThatNeverAnswers:
+    """Test the signal coordinator's handling of params that never answer."""
+
+    @pytest.fixture
+    def signal_coordinator(
+        self, hass: HomeAssistant, mock_config_entry: MockConfigEntry, mock_client
+    ) -> ArcanaSignalCoordinator:
+        mock_client.get_status = AsyncMock(return_value="ok")
+        return ArcanaSignalCoordinator(
+            hass,
+            mock_config_entry,
+            mock_client,
+            static_data={"ver": "1.0", "serial": "SN001"},
+        )
+
+    @staticmethod
+    def get_with_silent(silent: set[str]):
+        def get(param: str) -> str:
+            if param in silent:
+                raise TimeoutError()
+            return f"{param}_val"
+
+        return AsyncMock(side_effect=get)
+
+    @staticmethod
+    def polled(mock_client) -> list[str]:
+        return [call.args[0] for call in mock_client.get.call_args_list]
+
+    async def poll(self, signal_coordinator, times: int) -> dict[str, str]:
+        data: dict[str, str] = {}
+        for _ in range(times):
+            data = await signal_coordinator._async_update_data()
+        return data
+
+    async def test_unanswered_param_is_absent_from_data(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent({"txtmds"})
+
+        data = await signal_coordinator._async_update_data()
+
+        assert "txtmds" not in data
+        assert data["audiopcm"] == "audiopcm_val"
+
+    async def test_keeps_polling_unanswered_param_until_it_has_timed_out_three_times(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent({"txtmds"})
+
+        await self.poll(signal_coordinator, 3)
+
+        assert self.polled(mock_client).count("txtmds") == 3
+
+    async def test_stops_polling_param_that_never_answered(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent({"txtmds"})
+
+        await self.poll(signal_coordinator, 5)
+
+        assert self.polled(mock_client).count("txtmds") == 3
+
+    async def test_keeps_polling_params_that_answer(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent({"txtmds"})
+
+        await self.poll(signal_coordinator, 5)
+
+        for param in SIGNAL_POLLED_PARAMS:
+            if param != "txtmds":
+                assert self.polled(mock_client).count(param) == 5
+
+    async def test_keeps_polling_param_that_answered_before_timing_out(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent(set())
+        await signal_coordinator._async_update_data()
+
+        mock_client.get = self.get_with_silent({"txtmds"})
+        await self.poll(signal_coordinator, 5)
+
+        assert self.polled(mock_client).count("txtmds") == 5
+
+    async def test_param_that_answers_within_three_polls_keeps_polling(
+        self, signal_coordinator, mock_client
+    ):
+        mock_client.get = self.get_with_silent({"txtmds"})
+        await self.poll(signal_coordinator, 2)
+
+        mock_client.get = self.get_with_silent(set())
+        data = await self.poll(signal_coordinator, 1)
+        assert data["txtmds"] == "txtmds_val"
+
+        mock_client.get = self.get_with_silent({"txtmds"})
+        await self.poll(signal_coordinator, 5)
+
+        assert self.polled(mock_client).count("txtmds") == 5

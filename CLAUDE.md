@@ -15,7 +15,7 @@ task format          # auto-format
 
 Tasks cache based on source file hashes. `task --force <name>` to bypass.
 
-Requires a nix devshell (`nix develop`) for python, go-task, ruff, and bd.
+Requires a nix devshell (`nix develop`) for python, go-task, and ruff.
 
 ## Translations
 
@@ -38,8 +38,3 @@ Requires a nix devshell (`nix develop`) for python, go-task, ruff, and bd.
 - `async_unload_entry` unloads platforms first, then disconnects serial
 - Tests use `pytest-homeassistant-custom-component` — shared fixtures in
   `conftest.py`, per-file coordinator fixtures with test-specific mock data
-
-## Issue Tracking
-
-[beads](https://github.com/steveyegge/beads) — `bd ready`, `bd show <id>`,
-`bd close <id>`.

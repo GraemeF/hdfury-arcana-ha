@@ -39,7 +39,8 @@ class ArcanaSerialClient:
             self._reader, self._writer = await open_serial_connection(
                 url=self._port, baudrate=BAUD_RATE, byte_size=8, parity="N", stopbits=1
             )
-        except SerialException as err:
+        # serialx raises ValueError when a network device has no port by that name
+        except (SerialException, ValueError) as err:
             raise ConnectionError(str(err)) from err
         self._connected = True
         self._backoff_delay = self.INITIAL_BACKOFF

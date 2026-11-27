@@ -6,6 +6,7 @@ import asyncio
 from unittest.mock import AsyncMock, patch
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -29,6 +30,32 @@ def _mock_comport(device="/dev/ttyUSB0", serial_number="ABC", manufacturer="FTDI
         interface_description=None,
         interface_num=None,
     )
+
+
+class FakeArcana:
+    """Answer commands the way an Arcana does on the far end of its port."""
+
+    def __init__(self, serial_number: str) -> None:
+        self.reader = asyncio.StreamReader()
+        self._serial_number = serial_number
+
+    def write(self, data: bytes) -> None:
+        args = data.decode().removeprefix("#arcana get ").split()
+        if args == ["ver"]:
+            reply = "ARCANA VER: 0.88"
+        elif args == ["serial"]:
+            reply = f"serial {self._serial_number}"
+        elif args[0] == "status":
+            reply = f"{args[1].upper()}: none"
+        else:
+            reply = f"{args[0]} off"
+        self.reader.feed_data(f"{reply}\r\n".encode())
+
+    def close(self) -> None:
+        """Close the connection."""
+
+    async def wait_closed(self) -> None:
+        """Wait for the connection to close."""
 
 
 def _make_client_mock(ver="1.0", serial="SN001"):
@@ -165,6 +192,41 @@ class TestManualStep:
         assert result["data"]["firmware_version"] == "2.5"
         assert result["data"]["serial_number"] == "XYZ789"
         assert result["result"].unique_id == "XYZ789"
+
+    async def test_sets_up_a_network_port_from_its_url(self, hass: HomeAssistant):
+        url = "esphome://aux-2.local:6053?port_name=Port%201"
+        opened_urls = []
+
+        async def open_arcana(*, url, **settings):
+            opened_urls.append(url)
+            arcana = FakeArcana(serial_number="AUX2SN")
+            return arcana.reader, arcana
+
+        with (
+            patch(
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
+                return_value=[],
+            ),
+            patch(
+                "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+                side_effect=open_arcana,
+            ),
+        ):
+            result = await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": config_entries.SOURCE_USER}
+            )
+            result = await hass.config_entries.flow.async_configure(
+                result["flow_id"],
+                user_input={"serial_port": url},
+            )
+            await hass.async_block_till_done()
+
+        assert result["type"] == FlowResultType.CREATE_ENTRY
+        entry = result["result"]
+        assert entry.data["serial_port"] == url
+        assert entry.state is ConfigEntryState.LOADED
+        assert entry.runtime_data.coordinator.data["serial"] == "AUX2SN"
+        assert opened_urls == [url, url]
 
 
 class TestOptionsFlow:

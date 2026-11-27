@@ -110,7 +110,7 @@ class ArcanaSerialClient:
                     self._reader.readuntil(b"\r\n"), timeout=COMMAND_TIMEOUT
                 )
                 return raw.decode().strip()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 raise
             except (OSError, asyncio.IncompleteReadError):
                 self._connected = False

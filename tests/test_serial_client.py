@@ -204,9 +204,9 @@ class TestTimeout:
             patch.object(client, "_reader", reader),
             patch.object(client, "_writer", writer),
             patch.object(client, "_connected", True),
+            pytest.raises(asyncio.TimeoutError),
         ):
-            with pytest.raises(asyncio.TimeoutError):
-                await client.get("scalemode")
+            await client.get("scalemode")
 
 
 class TestTimeoutDoesNotDisconnect:
@@ -363,13 +363,15 @@ class TestReconnect:
             attempt_times.append(asyncio.get_event_loop().time())
             raise ConnectionError("nope")
 
-        with patch(
-            "custom_components.hdfury_arcana.serial_client.open_serial_connection",
-            new_callable=AsyncMock,
-            side_effect=failing_connect,
+        with (
+            patch(
+                "custom_components.hdfury_arcana.serial_client.open_serial_connection",
+                new_callable=AsyncMock,
+                side_effect=failing_connect,
+            ),
+            pytest.raises(ConnectionError),
         ):
-            with pytest.raises(ConnectionError):
-                await client.get("ver")
+            await client.get("ver")
 
         # Should have attempted multiple times
         assert len(attempt_times) > 1

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.hdfury_arcana.const import DOMAIN
 from custom_components.hdfury_arcana.coordinator import (
@@ -14,8 +14,6 @@ from custom_components.hdfury_arcana.coordinator import (
     SIGNAL_POLLED_PARAMS,
     STATIC_PARAMS,
 )
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 def _mock_client_with_data():
@@ -88,9 +86,7 @@ class TestSignalCoordinatorFailure:
         self, hass: HomeAssistant, mock_entry: MockConfigEntry
     ):
         mock_client = _mock_client_with_data()
-        mock_client.get_status = AsyncMock(
-            side_effect=asyncio.TimeoutError("no response")
-        )
+        mock_client.get_status = AsyncMock(side_effect=TimeoutError("no response"))
 
         with patch(
             "custom_components.hdfury_arcana.coordinator.ArcanaSerialClient",
@@ -111,12 +107,10 @@ class TestSignalCoordinatorFailure:
         def selective_get(p):
             if p in settings_responses:
                 return settings_responses[p]
-            raise asyncio.TimeoutError("no response")
+            raise TimeoutError("no response")
 
         mock_client.get = AsyncMock(side_effect=selective_get)
-        mock_client.get_status = AsyncMock(
-            side_effect=asyncio.TimeoutError("no response")
-        )
+        mock_client.get_status = AsyncMock(side_effect=TimeoutError("no response"))
 
         with patch(
             "custom_components.hdfury_arcana.coordinator.ArcanaSerialClient",

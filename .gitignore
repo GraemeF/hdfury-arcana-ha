@@ -6,11 +6,6 @@ dist/
 .ruff_cache/
 .venv/
 result
-
-# Beads / Dolt files (added by bd init)
-.dolt/
-*.db
-.beads-credential-key
 .direnv/
 .claude/settings.local.json
 .venv/

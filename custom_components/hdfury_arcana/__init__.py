@@ -9,9 +9,9 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .coordinator import (
+    DEFAULT_SIGNAL_POLL_INTERVAL,
     ArcanaCoordinator,
     ArcanaSignalCoordinator,
-    DEFAULT_SIGNAL_POLL_INTERVAL,
 )
 
 PLATFORMS: list[Platform] = [

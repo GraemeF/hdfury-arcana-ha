@@ -11,7 +11,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        pythonEnv = pkgs.python312.withPackages (ps: with ps; [
+        pythonEnv = pkgs.python314.withPackages (ps: with ps; [
           pyserial-asyncio
           pytest
           pytest-asyncio

@@ -93,7 +93,7 @@ class ArcanaSerialClient:
             try:
                 await self.connect()
                 return
-            except (ConnectionError, OSError):
+            except ConnectionError, OSError:
                 if attempt == self.MAX_RETRIES - 1:
                     raise
                 _LOGGER.debug(
@@ -116,6 +116,6 @@ class ArcanaSerialClient:
                 return raw.decode().strip()
             except TimeoutError:
                 raise
-            except (OSError, asyncio.IncompleteReadError):
+            except OSError, asyncio.IncompleteReadError:
                 self._connected = False
                 raise

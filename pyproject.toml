@@ -2,7 +2,7 @@
 name = "hdfury-arcana-ha"
 version = "0.1.0"
 description = "Home Assistant custom integration for HDFury Arcana"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 license = "Apache-2.0"
 dependencies = [
     "serialx[esphome]>=1.8.2",
@@ -13,7 +13,7 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5.0",
-    "pytest-homeassistant-custom-component>=0.13",
+    "pytest-homeassistant-custom-component>=0.13.344",
     "ruff==0.17.6",
 ]
 
@@ -23,5 +23,5 @@ asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 88

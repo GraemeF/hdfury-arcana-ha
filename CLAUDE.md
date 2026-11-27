@@ -3,6 +3,22 @@
 Home Assistant custom integration for the HDFury Arcana eARC adapter,
 communicating over RS-232 serial.
 
+## What hdfury-arcana-ha owns
+
+- The integration's code, which Home Assistant installs through HACS.
+- The integration's behaviour: how it talks to the Arcana over serial, and the
+  entities it exposes for the device's settings and status.
+- Releases of the integration, which the maintainer publishes.
+
+## What it does not own
+
+- A user's deployment. Whoever runs Home Assistant owns its host, its
+  installation and the serial hardware that reaches the Arcana.
+- A user's configuration and data. They live with that user.
+- Home Assistant itself and the serial libraries it supports, which their own
+  maintainers own.
+- The Arcana's firmware and its serial protocol, which HDFury owns.
+
 ## Build Pipeline
 
 **Never invoke pytest, ruff, or pip directly.** Always use `task`.

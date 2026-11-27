@@ -9,19 +9,26 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+from serialx import SerialPortInfo
 
 from custom_components.hdfury_arcana.config_flow import MANUAL_ENTRY
 from custom_components.hdfury_arcana.const import DOMAIN
 
 
 def _mock_comport(device="/dev/ttyUSB0", serial_number="ABC", manufacturer="FTDI"):
-    """Create a mock serial port info object."""
-    port = type("PortInfo", (), {})()
-    port.device = device
-    port.serial_number = serial_number
-    port.manufacturer = manufacturer
-    port.description = "USB Serial"
-    return port
+    """Create a serial port as serialx lists it."""
+    return SerialPortInfo(
+        device=device,
+        resolved_device=device,
+        vid=0x0403,
+        pid=0x6001,
+        serial_number=serial_number,
+        manufacturer=manufacturer,
+        product="USB Serial",
+        bcd_device=None,
+        interface_description=None,
+        interface_num=None,
+    )
 
 
 def _make_client_mock(ver="1.0", serial="SN001"):
@@ -39,7 +46,7 @@ class TestUserStep:
         ports = [_mock_comport("/dev/ttyUSB0"), _mock_comport("/dev/ttyUSB1")]
 
         with patch(
-            "custom_components.hdfury_arcana.config_flow.comports",
+            "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
             return_value=ports,
         ):
             result = await hass.config_entries.flow.async_init(
@@ -48,14 +55,18 @@ class TestUserStep:
 
         assert result["type"] == FlowResultType.FORM
         assert result["step_id"] == "user"
-        schema_keys = list(result["data_schema"].schema.keys())
-        assert len(schema_keys) == 1
+        (port_validator,) = result["data_schema"].schema.values()
+        assert port_validator.container == [
+            "/dev/ttyUSB0",
+            "/dev/ttyUSB1",
+            MANUAL_ENTRY,
+        ]
 
     async def test_includes_manual_entry_option(self, hass: HomeAssistant):
         ports = [_mock_comport()]
 
         with patch(
-            "custom_components.hdfury_arcana.config_flow.comports",
+            "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
             return_value=ports,
         ):
             result = await hass.config_entries.flow.async_init(
@@ -75,7 +86,7 @@ class TestUserStep:
 
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=ports,
             ),
             patch(
@@ -99,7 +110,7 @@ class TestUserStep:
         ports = [_mock_comport()]
 
         with patch(
-            "custom_components.hdfury_arcana.config_flow.comports",
+            "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
             return_value=ports,
         ):
             result = await hass.config_entries.flow.async_init(
@@ -115,7 +126,7 @@ class TestUserStep:
 
     async def test_no_ports_detected_goes_straight_to_manual(self, hass: HomeAssistant):
         with patch(
-            "custom_components.hdfury_arcana.config_flow.comports",
+            "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
             return_value=[],
         ):
             result = await hass.config_entries.flow.async_init(
@@ -132,7 +143,7 @@ class TestManualStep:
     async def test_creates_entry_on_success(self, hass: HomeAssistant):
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=[],
             ),
             patch(
@@ -198,7 +209,7 @@ class TestConnectionErrors:
 
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=ports,
             ),
             patch(
@@ -225,7 +236,7 @@ class TestConnectionErrors:
 
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=ports,
             ),
             patch(
@@ -252,7 +263,7 @@ class TestConnectionErrors:
 
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=ports,
             ),
             patch(
@@ -279,7 +290,7 @@ class TestConnectionErrors:
     async def test_manual_step_shows_error_on_failure(self, hass: HomeAssistant):
         with (
             patch(
-                "custom_components.hdfury_arcana.config_flow.comports",
+                "custom_components.hdfury_arcana.config_flow.async_list_serial_ports",
                 return_value=[],
             ),
             patch(

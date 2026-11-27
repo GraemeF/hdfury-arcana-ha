@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from serial_asyncio_fast import open_serial_connection
+from serialx import SerialException, open_serial_connection
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,9 +35,12 @@ class ArcanaSerialClient:
 
     async def connect(self) -> None:
         """Open the serial connection."""
-        self._reader, self._writer = await open_serial_connection(
-            url=self._port, baudrate=BAUD_RATE, bytesize=8, parity="N", stopbits=1
-        )
+        try:
+            self._reader, self._writer = await open_serial_connection(
+                url=self._port, baudrate=BAUD_RATE, byte_size=8, parity="N", stopbits=1
+            )
+        except SerialException as err:
+            raise ConnectionError(str(err)) from err
         self._connected = True
         self._backoff_delay = self.INITIAL_BACKOFF
 

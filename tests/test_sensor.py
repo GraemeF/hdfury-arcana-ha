@@ -5,16 +5,15 @@ from __future__ import annotations
 import pytest
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 from custom_components.hdfury_arcana.sensor import (
+    SIGNAL_SENSORS,
     ArcanaDiagnosticSensor,
     ArcanaFirmwareSensor,
     ArcanaSerialSensor,
-    SIGNAL_SENSORS,
 )
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 @pytest.fixture

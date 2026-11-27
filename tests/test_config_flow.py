@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock, patch
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.hdfury_arcana.config_flow import MANUAL_ENTRY
 from custom_components.hdfury_arcana.const import DOMAIN
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 def _mock_comport(device="/dev/ttyUSB0", serial_number="ABC", manufacturer="FTDI"):
@@ -64,7 +64,7 @@ class TestUserStep:
 
         # The dropdown options should include the manual entry sentinel
         schema = result["data_schema"].schema
-        port_key = list(schema.keys())[0]
+        port_key = next(iter(schema.keys()))
         validator = schema[port_key]
         assert MANUAL_ENTRY in validator.container
 

@@ -6,16 +6,15 @@ from unittest.mock import AsyncMock
 
 import pytest
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 from custom_components.hdfury_arcana.button import (
+    BUTTONS,
     ArcanaButtonEntity,
     ArcanaFactoryResetButtonEntity,
     ArcanaRefreshButtonEntity,
-    BUTTONS,
 )
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
 
 
 @pytest.fixture

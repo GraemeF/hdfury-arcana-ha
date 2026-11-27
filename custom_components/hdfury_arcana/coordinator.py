@@ -81,9 +81,9 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
         try:
             return await self._client.set(param, value)
         except (
+            TimeoutError,
             ConnectionError,
             OSError,
-            asyncio.TimeoutError,
             asyncio.IncompleteReadError,
         ) as err:
             raise HomeAssistantError(str(err)) from err
@@ -107,7 +107,7 @@ class ArcanaCoordinator(DataUpdateCoordinator[dict[str, str]]):
             for param in params_to_poll:
                 try:
                     data[param] = await self._client.get(param)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     _LOGGER.debug("Timeout polling %s, skipping", param)
                     continue
 
@@ -157,14 +157,14 @@ class ArcanaSignalCoordinator(DataUpdateCoordinator[dict[str, str]]):
             for param in SIGNAL_POLLED_PARAMS:
                 try:
                     data[param] = await self._client.get(param)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     _LOGGER.debug("Timeout polling %s, skipping", param)
                     continue
 
             for param in STATUS_PARAMS:
                 try:
                     data[param] = await self._client.get_status(param)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     _LOGGER.debug("Timeout polling status %s, skipping", param)
                     continue
 

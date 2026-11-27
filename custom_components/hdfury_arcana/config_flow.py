@@ -6,10 +6,9 @@ import asyncio
 import logging
 
 import voluptuous as vol
-from serial.tools.list_ports import comports
-
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
+from serial.tools.list_ports import comports
 
 from .const import DOMAIN
 from .coordinator import DEFAULT_SIGNAL_POLL_INTERVAL
@@ -98,12 +97,7 @@ class ArcanaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Validate connection and create config entry, or show errors."""
         try:
             info = await self._validate_connection(serial_port)
-        except (
-            ConnectionError,
-            asyncio.TimeoutError,
-            asyncio.IncompleteReadError,
-            OSError,
-        ):
+        except (TimeoutError, ConnectionError, asyncio.IncompleteReadError, OSError):
             errors["base"] = "cannot_connect"
         except Exception:
             _LOGGER.exception("Unexpected error during config flow")

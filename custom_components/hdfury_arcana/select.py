@@ -8,8 +8,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ArcanaConfigEntry
-from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
+from .entity import ArcanaEntity
 
 SELECTS: dict[str, list[str]] = {
     "scalemode": [

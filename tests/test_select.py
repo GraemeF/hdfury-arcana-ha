@@ -7,11 +7,10 @@ from unittest.mock import AsyncMock
 import pytest
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.hdfury_arcana.coordinator import ArcanaCoordinator
-from custom_components.hdfury_arcana.select import ArcanaSelectEntity, SELECTS
-
-from pytest_homeassistant_custom_component.common import MockConfigEntry
+from custom_components.hdfury_arcana.select import SELECTS, ArcanaSelectEntity
 
 
 @pytest.fixture

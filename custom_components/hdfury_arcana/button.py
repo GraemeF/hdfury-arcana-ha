@@ -7,8 +7,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ArcanaConfigEntry
-from .entity import ArcanaEntity
 from .coordinator import ArcanaCoordinator
+from .entity import ArcanaEntity
 
 BUTTONS: list[str] = ["hotplug", "reboot"]
 

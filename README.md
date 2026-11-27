@@ -120,3 +120,7 @@ After setup, go to the integration's options to configure:
 
 - HDFury Arcana connected via USB-to-3.5mm RS-232 cable (FTDI chipset recommended)
 - Home Assistant 2025.1.0 or later
+
+## Licence
+
+Apache-2.0. See [LICENSE](LICENSE).

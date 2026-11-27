@@ -9,8 +9,9 @@
       },
       "manual": {
         "title": "Enter serial port",
+        "description": "Enter the device path of a serial port on this host, such as /dev/ttyUSB0. For a port that an ESPHome serial proxy shares over the network, enter its URL in the form esphome://HOST:6053?port_name=PORT.",
         "data": {
-          "serial_port": "Serial port path"
+          "serial_port": "Serial port path or URL"
         }
       }
     },

@@ -12,6 +12,10 @@ The Arcana exposes an RS-232 serial interface via its 3.5mm jack. You need a USB
 
 The integration communicates at 19200 baud, 8N1.
 
+### Over the network
+
+The integration can also reach the Arcana through a serial port that an [ESPHome serial proxy](https://esphome.io/components/serial_proxy/) shares over the network, such as an RS-232 port on a [Home Assistant Connect AUX-2](https://www.home-assistant.io/connect/aux-2/). Connect the Arcana's RS-232 jack to the proxy's port, and set the port up in the integration by its URL, as [Network serial ports](#network-serial-ports) describes.
+
 ## Installation
 
 ### HACS (recommended)
@@ -30,8 +34,20 @@ Copy the `custom_components/hdfury_arcana` directory into your Home Assistant `c
 
 1. Go to **Settings → Devices & Services → Add Integration**
 2. Search for "HDFury Arcana"
-3. Select or enter the serial port path (e.g. `/dev/ttyUSB0`)
+3. Select the serial port, such as `/dev/ttyUSB0`. For a port the list doesn't show, including a network port, choose **Enter manually...** and enter its path or URL.
 4. The integration will verify the connection and detect the device
+
+### Network serial ports
+
+A port that an ESPHome serial proxy shares has a URL of this form:
+
+```
+esphome://<host>:6053?port_name=<port name>
+```
+
+- `<host>` is the proxy's hostname or IP address, and 6053 is the port of its ESPHome API.
+- `<port name>` is the name the proxy's ESPHome configuration gives the serial port. Write a space in it as `+`.
+- If the proxy's API uses an encryption key, add `&key=<encryption key>` to the URL. Write `+` in the key as `%2B`, `/` as `%2F` and `=` as `%3D`.
 
 ### Options
 
@@ -120,8 +136,8 @@ A binary sensor reads unknown when the Arcana does not answer for it. Some firmw
 
 ## Requirements
 
-- HDFury Arcana connected via USB-to-3.5mm RS-232 cable (FTDI chipset recommended)
-- Home Assistant 2025.1.0 or later
+- HDFury Arcana connected via USB-to-3.5mm RS-232 cable (FTDI chipset recommended), or to an ESPHome serial proxy
+- Home Assistant 2026.7.0 or later
 
 ## Licence
 

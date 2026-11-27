@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import socket
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -504,3 +505,30 @@ class TestRealSerialDevice:
 
         assert version == "0.88"
         assert bytes(received) == b"#arcana get ver\r"
+
+
+@pytest.mark.usefixtures("socket_enabled")
+class TestNetworkPort:
+    """Reach a serial port that an ESPHome device shares over the network."""
+
+    @pytest.fixture
+    def refused_port(self):
+        """Return a localhost TCP port that nothing listens on."""
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            return sock.getsockname()[1]
+
+    async def test_esphome_url_reaches_the_network(self, refused_port):
+        client = ArcanaSerialClient(
+            f"esphome://127.0.0.1:{refused_port}?port_name=arcana"
+        )
+
+        with pytest.raises(ConnectionError) as exc_info:
+            await client.connect()
+
+        causes = []
+        cause = exc_info.value
+        while cause is not None:
+            causes.append(cause)
+            cause = cause.__cause__
+        assert any(isinstance(c, ConnectionRefusedError) for c in causes)

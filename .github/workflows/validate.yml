@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+    # A retitled pull request moves no commit, so without `edited` the subject
+    # check keeps its old verdict on a title it never read.
+    types: [opened, synchronize, reopened, edited]
   workflow_call:
 
 permissions:
@@ -16,6 +19,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+      # The title reaches the script through the environment, because whoever
+      # opened the pull request wrote it.
+      - name: The pull request's title is a Conventional Commit
+        if: github.event_name == 'pull_request'
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: scripts/conventional-subject.sh "$TITLE"
       - uses: home-assistant/actions/hassfest@9e9565e68f5a70d874202871f4c4064d23814235 # master
       - uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
         with:

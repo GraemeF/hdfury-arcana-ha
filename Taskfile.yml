@@ -11,6 +11,7 @@
 # Dependency graph:
 #
 #   setup → format-check + lint → unit-test → test
+#   release-notes-check → test
 
 version: "3"
 
@@ -87,12 +88,24 @@ tasks:
       - pyproject.toml
 
   # ============================================================================
+  # RELEASE NOTES: the manifest's version has its notes for the Release workflow
+  # ============================================================================
+
+  release-notes-check:
+    desc: Check the manifest's version has release notes
+    cmd: '{{.RUN_STEP}} "Release notes" ./scripts/release-info.sh'
+    sources:
+      - custom_components/hdfury_arcana/manifest.json
+      - RELEASE-NOTES/*.md
+      - scripts/release-info.sh
+
+  # ============================================================================
   # TEST: the comprehensive "safe to merge" gate
   # ============================================================================
 
   test:
-    desc: "Full pipeline: setup → format-check + lint → unit-test"
-    deps: [unit-test]
+    desc: "Full pipeline: setup → format-check + lint → unit-test, release-notes-check"
+    deps: [unit-test, release-notes-check]
     cmd: |
       echo ""
       echo "All checks and tests passed"

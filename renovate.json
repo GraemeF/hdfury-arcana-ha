@@ -4,5 +4,12 @@
   "enabledManagers": ["github-actions", "pep621"],
   "minimumReleaseAge": "3 days",
   "internalChecksFilter": "strict",
-  "dependencyDashboard": true
+  "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "description": "CI runs the Python that Home Assistant core supports. Raise the cap when Home Assistant adds the next Python.",
+      "matchDepNames": ["python"],
+      "allowedVersions": "<3.15"
+    }
+  ]
 }

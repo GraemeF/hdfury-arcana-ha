@@ -85,6 +85,7 @@ tasks:
     sources:
       - custom_components/**/*.py
       - tests/**/*.py
+      - scripts/conventional-subject.sh
       - pyproject.toml
 
   # ============================================================================

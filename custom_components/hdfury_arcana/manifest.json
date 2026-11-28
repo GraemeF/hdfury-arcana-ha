@@ -1,6 +1,7 @@
 {
   "domain": "hdfury_arcana",
   "name": "HDFury Arcana",
+  "categories": ["media_entertainment.speakers_audio", "media_entertainment.tv_streaming"],
   "codeowners": ["@GraemeF"],
   "config_flow": true,
   "dependencies": [],
